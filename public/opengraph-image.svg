@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="accent" x1="82" y1="80" x2="510" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1677FF"/><stop offset="1" stop-color="#6738F5"/>
+    </linearGradient>
+    <linearGradient id="wash" x1="115" y1="30" x2="1110" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#F5F8FC"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#wash)"/>
+  <circle cx="1078" cy="106" r="222" fill="#00C8E8" fill-opacity=".12"/>
+  <circle cx="1132" cy="550" r="226" fill="#6738F5" fill-opacity=".09"/>
+  <path d="M80 500H1120" stroke="#DCE5F0" stroke-width="2"/>
+  <text x="84" y="168" fill="#071B3D" font-family="Arial, Helvetica, sans-serif" font-size="45" font-weight="800" letter-spacing="3">QITOOL</text>
+  <rect x="84" y="205" width="82" height="7" rx="3.5" fill="url(#accent)"/>
+  <text x="80" y="329" fill="#071B3D" font-family="Arial, Helvetica, sans-serif" font-size="75" font-weight="750" letter-spacing="-3">Smart Tools.</text>
+  <text x="80" y="418" fill="url(#accent)" font-family="Arial, Helvetica, sans-serif" font-size="75" font-weight="750" letter-spacing="-3">Simple Life.</text>
+  <text x="84" y="470" fill="#53647C" font-family="Arial, Helvetica, sans-serif" font-size="23">Free online tools designed for everyday tasks.</text>
+  <rect x="802" y="222" width="306" height="205" rx="25" fill="#FFFFFF" stroke="#DFE8F2" stroke-width="2"/>
+  <text x="834" y="269" fill="#53647C" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="1.5">QUICK EXAMPLE</text>
+  <text x="834" y="324" fill="#071B3D" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="600">20% of 250</text>
+  <path d="M834 348H1075" stroke="#E8EEF5" stroke-width="2"/>
+  <text x="834" y="392" fill="#53647C" font-family="Arial, Helvetica, sans-serif" font-size="17">Answer</text>
+  <text x="1074" y="394" fill="#1677FF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" text-anchor="end">50</text>
+</svg>
