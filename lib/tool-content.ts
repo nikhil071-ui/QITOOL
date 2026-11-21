@@ -6,7 +6,11 @@ export type ToolArticle = {
   introduction: string;
   whatItDoes: string;
   instructions: string[];
-  example: { title: string; details: string };
+  example: {
+    title: string;
+    details: string;
+    loanComparison?: { principal: number; annualRatePercent: number; tenures: number[] };
+  };
   resultExplanation: string;
   commonMistakes: string[];
   faqs: { question: string; answer: string }[];
@@ -68,7 +72,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Enter a loan amount in Indian rupees, a fixed nominal annual rate and three different tenures in months. Compare monthly EMI, total repayment and interest before considering fees or lender terms.",
     whatItDoes: "The calculation uses the standard amortizing-loan formula with the annual nominal rate divided into monthly periods. It assumes a fixed rate, equal monthly instalments, and no fees, taxes, or prepayments. The schedule applies each month’s interest to the remaining balance.",
     instructions: ["Enter the loan principal in rupees and a fixed annual interest rate.", "Enter the main tenure and two different comparison tenures as whole months.", "Select Calculate and compare EMI. Review monthly payments and totals, then use the main tenure's schedule or CSV."],
-    example: { title: "A ₹5,00,000 loan at 9% for 60 months", details: "The estimated monthly EMI is about ₹10,379. Total paid is about ₹6,22,751, including about ₹1,22,751 in interest." },
+    example: {
+      title: "How does tenure affect the cost of a ₹5,00,000 loan?",
+      details: "The principal stays fixed at ₹5,00,000 and the nominal annual rate stays fixed at 9%. A longer tenure lowers the monthly EMI but increases the total interest paid.",
+      loanComparison: { principal: 500000, annualRatePercent: 9, tenures: [36, 60, 84] },
+    },
     resultExplanation: "The schedule rounds cumulative principal and each month’s interest to whole paise. Monthly amounts can differ by a paise from the displayed EMI. The final row pays the outstanding principal, and totals add up to the scheduled payments. Lenders may use different day-count rules, round instalments, or add charges.",
     faqs: [
       { question: "What does EMI mean?", answer: "EMI means equated monthly instalment: a regular payment that includes both principal repayment and interest." },

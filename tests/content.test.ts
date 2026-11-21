@@ -3,6 +3,25 @@ import test from "node:test";
 import { tools } from "../lib/tools";
 import { getToolArticle } from "../lib/tool-content";
 import { categoryGuides } from "../lib/category-guides";
+import { calculateLoanTenureComparison, formatAmount } from "../lib/calculations";
+
+test("the EMI worked example matches the calculator to the paise for all three tenures", () => {
+  const emi = tools.find(tool => tool.slug === "emi-calculator");
+  assert.ok(emi);
+  const { details, loanComparison } = getToolArticle(emi).example;
+  assert.ok(loanComparison);
+  assert.match(details, /principal stays fixed at ₹5,00,000/u);
+  assert.match(details, /nominal annual rate stays fixed at 9%/u);
+  const { principal, annualRatePercent, tenures } = loanComparison;
+  const loans = calculateLoanTenureComparison(principal, annualRatePercent, tenures);
+  assert.deepEqual(loans.map(loan => [
+    loan.inputs.months, formatAmount(loan.monthlyPayment), formatAmount(loan.totalInterest), formatAmount(loan.totalPayment),
+  ]), [
+    [36, "₹15,899.87", "₹72,395.17", "₹5,72,395.17"],
+    [60, "₹10,379.18", "₹1,22,750.66", "₹6,22,750.66"],
+    [84, "₹8,044.54", "₹1,75,741.27", "₹6,75,741.27"],
+  ]);
+});
 
 test("every listed tool has distinct, complete search and help content", () => {
   const introductions = new Set<string>();

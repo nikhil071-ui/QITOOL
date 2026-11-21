@@ -13,6 +13,7 @@ test("search is trimmed and case insensitive", () => {
 
 test("search includes useful descriptions, not only tool names", () => {
   assert.deepEqual(filterTools("reading time").map(({ slug }) => slug), ["word-counter"]);
+  assert.ok(filterTools("tenure").some(tool => tool.slug === "emi-calculator"));
 });
 
 test("category filters return only matching tools", () => {

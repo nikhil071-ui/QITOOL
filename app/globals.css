@@ -835,6 +835,8 @@ body { color: var(--text-strong); background: var(--page-bg); transition: backgr
 .tool-guide-card h2 { color: #173451; font-size: 17px; }
 .tool-guide-card p, .tool-instructions { color: #657A93; font-size: 12px; }
 .tool-example-card { background: linear-gradient(145deg,#FFFFFF,#F0F7FF); }
+.tool-example-card .schedule-table-wrap { margin: 12px 0; }
+.tool-example-card .schedule-table { font-size: 12px; }
 .tool-common-mistakes, .tool-faq-section, .related-tools-section { margin-top: 50px; }
 .related-tool-card { border-color: #DCE7F3; border-radius: 16px; background: rgba(255,255,255,.88); }
 .related-tool-card > strong { color: #173451; font-size: 14px; }

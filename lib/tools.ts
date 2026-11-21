@@ -21,7 +21,7 @@ export const tools: ToolInfo[] = [
   { name: "Age Calculator", slug: "age-calculator", category: "calculators", description: "Calculate your exact age in years, months, and days.", icon: "calendar" },
   { name: "Percentage Calculator", slug: "percentage-calculator", category: "calculators", description: "Find a percentage, compare proportions, or calculate a change.", icon: "percent" },
   { name: "BMI Calculator", slug: "bmi-calculator", category: "calculators", description: "Calculate body mass index using metric or imperial units.", icon: "heart" },
-  { name: "EMI Calculator", slug: "emi-calculator", category: "calculators", description: "Calculate monthly EMI, total interest, and total payment.", icon: "wallet" },
+  { name: "EMI Calculator", slug: "emi-calculator", category: "calculators", description: "Compare monthly EMI and total interest across three loan tenures in INR.", icon: "wallet" },
   { name: "GST Calculator", slug: "gst-calculator", category: "calculators", description: "Add or remove a selectable GST rate from an amount.", icon: "receipt" },
   { name: "Date Calculator", slug: "date-calculator", category: "calculators", description: "Count days between dates or add and subtract calendar days.", icon: "clock" },
   { name: "Discount Calculator", slug: "discount-calculator", category: "calculators", description: "Calculate the savings and final price after a discount.", icon: "tag" },

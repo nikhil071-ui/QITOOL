@@ -5,11 +5,44 @@ import { PageIntro } from "@/components/page-intro";
 import { ToolInterface } from "@/components/tools/tool-interface";
 import { JsonLd } from "@/components/json-ld";
 import { categoryGuides } from "@/lib/category-guides";
+import { calculateLoanTenureComparison, formatAmount } from "@/lib/calculations";
 import { toolStructuredData } from "@/lib/structured-data";
 import { categoryLabels, toolCategories, tools as toolList, type ToolInfo } from "@/lib/tools";
 import type { ToolArticle } from "@/lib/tool-content";
 
 const toolsBySlug: Record<string, ToolInfo> = Object.fromEntries(toolList.map((tool) => [tool.slug, tool]));
+
+function EmiExampleTable({ principal, annualRatePercent, tenures }: NonNullable<ToolArticle["example"]["loanComparison"]>) {
+  const loans = calculateLoanTenureComparison(principal, annualRatePercent, tenures);
+  return (
+    <>
+      <div className="schedule-table-wrap">
+        <table className="schedule-table">
+          <caption className="sr-only">Estimated EMI, total interest and total repayment by loan tenure</caption>
+          <thead>
+            <tr>
+              <th scope="col">Tenure</th>
+              <th scope="col">Monthly EMI</th>
+              <th scope="col">Total interest</th>
+              <th scope="col">Total repayment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loans.map((loan) => (
+              <tr key={loan.inputs.months}>
+                <th scope="row">{loan.inputs.months} months</th>
+                <td>{formatAmount(loan.monthlyPayment)}</td>
+                <td>{formatAmount(loan.totalInterest)}</td>
+                <td>{formatAmount(loan.totalPayment)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Link className="inline-link" href="/tools/loan-calculator">Inspect one loan’s monthly repayment schedule</Link>
+    </>
+  );
+}
 
 export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: ToolArticle }) {
   const categoryHref = toolCategories.find((category) => category.id === tool.category)?.href ?? "/tools";
@@ -42,7 +75,12 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
         <div className="tool-guide-grid">
           <section className="tool-guide-card"><p className="eyebrow">THE PURPOSE</p><h2>What this tool does</h2><p>{article.whatItDoes}</p></section>
           <section className="tool-guide-card"><p className="eyebrow">STEP BY STEP</p><h2>How to use it</h2><ol className="tool-instructions">{article.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol></section>
-          <section className="tool-guide-card tool-example-card"><p className="eyebrow">PRACTICAL EXAMPLE</p><h2>{article.example.title}</h2><p>{article.example.details}</p></section>
+          <section className="tool-guide-card tool-example-card">
+            <p className="eyebrow">PRACTICAL EXAMPLE</p>
+            <h2>{article.example.title}</h2>
+            <p>{article.example.details}</p>
+            {article.example.loanComparison && <EmiExampleTable {...article.example.loanComparison} />}
+          </section>
           <section className="tool-guide-card">
             <p className="eyebrow">UNDERSTANDING THE OUTPUT</p><h2>What the result means</h2>
             <p>{article.resultExplanation}</p>
