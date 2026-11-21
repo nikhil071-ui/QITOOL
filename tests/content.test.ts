@@ -1,9 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { tools } from "../lib/tools";
-import { getToolArticle } from "../lib/tool-content";
+import { getToolArticle, toolArticles } from "../lib/tool-content";
 import { categoryGuides } from "../lib/category-guides";
-import { calculateLoanTenureComparison, formatAmount } from "../lib/calculations";
+import { calculateGSTBreakdown, calculateLoanTenureComparison, formatAmount } from "../lib/calculations";
+
+test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
+  const { example, whatItDoes } = toolArticles["gst-calculator"];
+  assert.match(example.jumpLabel ?? "", /Remove GST.*reverse GST calculation/i);
+  assert.match(whatItDoes, /divide the inclusive price by \(1 \+ GST rate \/ 100\)/);
+  const { totalAmount, rate, baseAmount, gstAmount } = calculateGSTBreakdown(590, 18, "remove", "single");
+  assert.ok(example.details.includes(`₹${totalAmount} already includes ${rate}% GST`));
+  assert.ok(example.details.includes(`₹${totalAmount} ÷ 1.18 = ₹${baseAmount}`));
+  assert.ok(example.details.includes(`₹${gstAmount} is GST`));
+});
+
+test("the discount GST FAQ links to the registered GST calculator", () => {
+  const link = toolArticles["discount-calculator"].faqs.find(item => item.question === "Does the result include GST?")?.link;
+  assert.ok(link);
+  assert.equal(link.label, "calculate GST on the discounted price");
+  assert.equal(link.href, "/tools/gst-calculator");
+  assert.ok(tools.some(tool => `/tools/${tool.slug}` === link.href));
+});
 
 test("the EMI worked example matches the calculator to the paise for all three tenures", () => {
   const emi = tools.find(tool => tool.slug === "emi-calculator");
@@ -81,8 +99,6 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   assert.ok(date.faqs.some(faq => /elapsed and inclusive/u.test(faq.question)));
 
   const gst = getArticle("gst-calculator");
-  assert.match(gst.whatItDoes, /inclusive amount × 100 ÷ \(100 \+ GST rate\)/u);
-  assert.match(gst.example.details, /₹590.*₹500.*₹90/u);
   assert.match(gst.instructions[1], /rate that applies/u);
 
   const emi = getArticle("emi-calculator");

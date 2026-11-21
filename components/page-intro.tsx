@@ -1,9 +1,10 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ChevronRight, Home } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { breadcrumbStructuredData } from "@/lib/structured-data";
 
-type PageIntroProps = { title: string; description: string; eyebrow?: string; crumbs?: { label: string; href?: string }[] };
+type PageIntroProps = { title: string; description: ReactNode; eyebrow?: string; crumbs?: { label: string; href?: string }[] };
 
 export function PageIntro({ title, description, eyebrow = "QITOOL", crumbs = [] }: PageIntroProps) {
   const breadcrumbData = breadcrumbStructuredData(crumbs);

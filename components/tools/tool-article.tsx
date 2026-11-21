@@ -56,7 +56,10 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
         {application && <JsonLd data={application} />}
         <PageIntro
           title={article.seoTitle}
-          description={article.introduction}
+          description={<>
+            {article.introduction}
+            {article.example.jumpLabel && <> <a className="underline" href="#worked-example">{article.example.jumpLabel}</a></>}
+          </>}
           eyebrow={`${categoryLabels[tool.category].toUpperCase()} · FREE ONLINE TOOL`}
           crumbs={[{ label: "All tools", href: "/tools" }, { label: categoryLabels[tool.category], href: categoryHref }, { label: tool.name }]}
         />
@@ -75,7 +78,7 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
         <div className="tool-guide-grid">
           <section className="tool-guide-card"><p className="eyebrow">THE PURPOSE</p><h2>What this tool does</h2><p>{article.whatItDoes}</p></section>
           <section className="tool-guide-card"><p className="eyebrow">STEP BY STEP</p><h2>How to use it</h2><ol className="tool-instructions">{article.instructions.map((instruction) => <li key={instruction}>{instruction}</li>)}</ol></section>
-          <section className="tool-guide-card tool-example-card">
+          <section className="tool-guide-card tool-example-card" id={article.example.jumpLabel ? "worked-example" : undefined}>
             <p className="eyebrow">PRACTICAL EXAMPLE</p>
             <h2>{article.example.title}</h2>
             <p>{article.example.details}</p>
@@ -97,7 +100,14 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
 
         <section className="tool-faq-section" aria-labelledby="tool-faq-heading">
           <div className="tool-section-heading"><p className="eyebrow">COMMON QUESTIONS</p><h2 id="tool-faq-heading">Frequently asked questions</h2></div>
-          <div className="faq-list">{article.faqs.map((faq) => <details className="faq-item" key={faq.question}><summary><span>{faq.question}</span><span className="faq-toggle" aria-hidden="true"><span /><span /></span></summary><p>{faq.answer}</p></details>)}</div>
+          <div className="faq-list">
+            {article.faqs.map((faq) => (
+              <details className="faq-item" key={faq.question}>
+                <summary><span>{faq.question}</span><span className="faq-toggle" aria-hidden="true"><span /><span /></span></summary>
+                <p>{faq.answer}{faq.link && <> <Link className="underline" href={faq.link.href}>{faq.link.label}</Link>.</>}</p>
+              </details>
+            ))}
+          </div>
         </section>
 
         <section className="related-tools-section" aria-labelledby="related-tools-heading">

@@ -9,11 +9,12 @@ export type ToolArticle = {
   example: {
     title: string;
     details: string;
+    jumpLabel?: string;
     loanComparison?: { principal: number; annualRatePercent: number; tenures: number[] };
   };
   resultExplanation: string;
   commonMistakes: string[];
-  faqs: { question: string; answer: string }[];
+  faqs: { question: string; answer: string; link?: { href: string; label: string } }[];
   related: string[];
 };
 
@@ -90,12 +91,15 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "India GST Calculator for Inclusive and Exclusive Prices",
     seoDescription: "Add GST to an INR amount or recover the base from an inclusive total using the rate you supply. See tax and the applicable CGST and SGST split.",
     introduction: "Start with the price on your Indian invoice. Choose whether it already includes GST and enter the rate that you supply for the calculation. The breakdown shows the price before tax, the tax amount and the inclusive total.",
-    whatItDoes: "For an amount before tax, GST is the base multiplied by the rate. For a tax-inclusive amount, base amount = inclusive amount × 100 ÷ (100 + GST rate), and GST amount = inclusive amount − base amount. The optional CGST/SGST view divides the computed GST and is intended only for cases where that split applies. The calculator does not determine tax rates or tax treatment.",
+    whatItDoes: "To add GST, multiply the base price by the GST rate divided by 100 and add that tax to the base price. To remove GST, divide the inclusive price by (1 + GST rate / 100) to find the base price. The difference is the GST amount. Use the CGST/SGST split only when it applies to your transaction.",
     instructions: ["Choose Add GST or Remove GST.", "Enter an amount in rupees and paise. Supply the rate that applies to your transaction, using a preset or a custom percentage from 0 to 100.", "Choose a split only when it applies to your transaction, then calculate and review the base, tax, and total."],
-    example: { title: "Remove 18% GST from ₹590", details: "Base amount = ₹590 × 100 ÷ 118 = ₹500. GST is ₹590 − ₹500 = ₹90. Confirm the applicable rate and tax treatment for your invoice." },
+    example: {
+      jumpLabel: "See how Remove GST works in a reverse GST calculation.",
+      title: "Remove 18% GST from ₹590",
+      details: "If ₹590 already includes 18% GST, the base price is ₹590 ÷ 1.18 = ₹500. The remaining ₹90 is GST.",
+    },
     resultExplanation: "The listed rates are selectable examples, not tax advice. Tax is rounded to the nearest paise, with half a paise rounded up. CGST receives any odd paise and SGST receives the remainder. GST treatment can depend on the goods or services, place of supply, and current rules.",
     faqs: [
-      { question: "How is GST removed from a tax-inclusive price?", answer: "Base amount = inclusive amount × 100 ÷ (100 + GST rate). At 18%, ₹590 × 100 ÷ 118 = ₹500 before GST, leaving ₹90 GST." },
       { question: "Are these the right GST rates for every item?", answer: "No. Rates depend on the goods or services and applicable rules. Confirm the correct rate for your specific transaction." },
       { question: "When should I use the CGST and SGST split?", answer: "Use the split display only when an intra-state supply is taxed with CGST and SGST. Cross-state and other cases can have different treatment, so verify the applicable rule." },
     ],
@@ -127,7 +131,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     faqs: [
       { question: "How do I check two discounts on the same item?", answer: "Use the first sale price as the second original price. For example, applying 20% and then 10% to ₹1,000 gives ₹800 and then ₹720." },
       { question: "Can a discount be greater than 100%?", answer: "No. A discount above 100% would make the price negative, so this tool accepts values from 0% through 100%." },
-      { question: "Does the result include GST?", answer: "No. It only applies the discount to the entered price. Use the GST Calculator separately if you need a tax estimate." },
+      {
+        question: "Does the result include GST?",
+        answer: "The calculator applies the discount to the price you enter. If GST still needs to be added, first work out the sale price, then",
+        link: { href: "/tools/gst-calculator", label: "calculate GST on the discounted price" },
+      },
     ],
     related: ["percentage-calculator", "gst-calculator"],
   },
