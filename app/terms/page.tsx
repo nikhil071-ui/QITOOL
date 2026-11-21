@@ -20,7 +20,7 @@ export default function TermsPage() {
           <h2>Ownership</h2>
           <p>Unless stated otherwise, the QITOOL name, site design, and original content belong to the site owner. Do not copy or redistribute substantial portions of the site without permission.</p>
           <h2>Contact and updates</h2>
-          <p>Changes to these terms appear here with an updated date. The <Link href="/contact">Contact page</Link> gives the current status of email enquiries.</p>
+          <p>Changes to these terms appear here with an updated date. For questions about QITOOL or its tools, contact us using the email address on the <Link href="/contact">Contact page</Link>.</p>
         </article>
       </div>
     </main>

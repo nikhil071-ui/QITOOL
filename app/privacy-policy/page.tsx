@@ -2,7 +2,7 @@ import { PageIntro } from "@/components/page-intro";
 import Link from "next/link";
 import { googleAnalyticsId, pageMetadata } from "@/lib/site";
 
-export const metadata = pageMetadata("Privacy Policy", "Learn how QITOOL processes tool inputs, stores browser preferences, and handles page requests.", "/privacy-policy");
+export const metadata = pageMetadata("Privacy Policy", "Learn how QITOOL processes tool inputs, stores browser preferences, handles page requests, and uses information voluntarily sent by email.", "/privacy-policy");
 
 export default function PrivacyPolicyPage() {
   return (
@@ -19,8 +19,8 @@ export default function PrivacyPolicyPage() {
           <p>The theme preference is saved in your browser’s local storage. If the optional analytics integration is enabled, your choice to accept or decline analytics is also saved there. These settings are not sent to QITOOL’s application server. The hosting provider, content delivery network, or security service may use essential cookies or similar technologies.</p>
           <h2>Hosting and request data</h2>
           <p>To deliver and protect the website, its hosting provider receives network requests. Depending on the provider and configuration, this can include an IP address, requested URL, user-agent and device information, referrer, timestamps, and security events in operational logs. Log contents and retention depend on the hosting service and its settings.</p>
-          <h2>Contact email</h2>
-          <p>Email contact has not been activated; mailbox verification and sending and receiving tests are still pending. QITOOL does not provide a contact form. The <Link href="/contact">Contact page</Link> gives the current status.</p>
+          <h2>Contact by email</h2>
+          <p>You may voluntarily email QITOOL using the address on the <Link href="/contact">Contact page</Link>. We receive the email address and information you choose to include, and handle it to read and respond to your enquiry. Email services used to send and receive the message also process it under their own practices. Do not email passwords, payment credentials, or other sensitive information.</p>
           <h2>Analytics and advertising</h2>
           {googleAnalyticsId
             ? <p>Google Analytics 4 is configured for this deployment but its tag is not loaded unless you choose “Allow analytics.” If enabled, QITOOL sends page-view events containing the page path, page title, and page URL to Google. Google may process browser, device, network, and cookie information under its own terms. You can change your choice using “Analytics preferences” in the footer. A declined choice blocks the tag on later page loads and stops QITOOL’s page-view events for the current page. No advertising scripts, including Google AdSense, are included.</p>

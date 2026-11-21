@@ -1,24 +1,25 @@
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
-import { MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { pageMetadata } from "@/lib/site";
 
-export const metadata = pageMetadata("Contact Us", "Check the current status of email contact for calculator errors, corrections, accessibility issues, privacy concerns, and general feedback.", "/contact");
+export const metadata = pageMetadata("Contact Us", "Contact QITOOL by email about calculator errors, content corrections, accessibility issues, privacy concerns, or general feedback.", "/contact");
 
 export default function ContactPage() {
   return (
     <main id="main-content" className="inner-page content-page">
       <div className="page-shell">
-        <PageIntro title="Contact QITOOL." description="Email contact for calculator errors, content corrections, accessibility issues, privacy concerns and general feedback is pending mailbox verification and testing." crumbs={[{ label: "Contact us" }]} />
+        <PageIntro title="Contact QITOOL." description="Email QITOOL about calculator errors, content corrections, accessibility issues, privacy concerns, or general feedback." crumbs={[{ label: "Contact us" }]} />
         <section className="contact-card">
           <div className="contact-card-icon"><MessageCircle size={22} aria-hidden="true" /></div>
           <div>
             <p className="eyebrow">CONTACT QITOOL</p>
-            <h2>Email contact is pending mailbox verification and testing</h2>
-            <p>Email contact is not currently available. We will publish an address here only after the mailbox is verified for sending and receiving messages. In the meantime, each <Link href="/tools">tool guide</Link> explains how to check its inputs and results.</p>
+            <h2>Email the QITOOL team</h2>
+            <p>Email us about calculator errors, content corrections, accessibility issues, privacy concerns, or general feedback. For calculator errors, include the tool name, a non-sensitive example, and the result you expected. Do not include passwords, account numbers, or other sensitive information.</p>
+            <div className="contact-detail"><Mail size={16} aria-hidden="true" /><a className="inline-link" href="mailto:contact@qitool.tech">contact@qitool.tech</a></div>
           </div>
         </section>
-        <p className="contact-privacy-note">See the <Link href="/privacy-policy">privacy policy</Link> for information about tool inputs and hosting logs.</p>
+        <p className="contact-privacy-note">If you email us, we handle the information you send to respond to your enquiry. See the <Link href="/privacy-policy">privacy policy</Link> for details.</p>
       </div>
     </main>
   );
