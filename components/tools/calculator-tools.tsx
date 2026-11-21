@@ -331,12 +331,13 @@ export function LoanCalculator() {
   const [principal, setPrincipal] = useState("300000");
   const [rate, setRate] = useState("10");
   const [months, setMonths] = useState("36");
-  const calc = useToolCalculation<ReturnType<typeof calculateLoan>>();
+  const calc = useSubmittedCalculation({ principal, rate, months }, input =>
+    calculateLoan(
+      parseNumericInput(input.principal, "Loan amount"),
+      parseNumericInput(input.rate, "Annual interest rate"),
+      parseNumericInput(input.months, "Loan term in months"),
+    ));
   const reset = useReset(() => { setPrincipal("300000"); setRate("10"); setMonths("36"); }, calc.reset);
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    calc.run(() => calculateLoan(parseNumericInput(principal, "Loan amount"), parseNumericInput(rate, "Annual interest rate"), parseNumericInput(months, "Loan term in months")));
-  };
   const copyText = calc.result ? `Monthly payment ${formatAmount(calc.result.monthlyPayment)}; total interest ${formatAmount(calc.result.totalInterest)}; total payment ${formatAmount(calc.result.totalPayment)}.` : "";
   const downloadCsv = () => {
     if (!calc.result) return;
@@ -350,7 +351,7 @@ export function LoanCalculator() {
   };
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
+    <form noValidate className="tool-form" onSubmit={calc.submit} onChange={calc.reset}>
       <NumberField id="loan-principal" label="Loan amount (₹)" value={principal} onChange={setPrincipal} min={0.01} max={1_000_000_000_000} step={0.01} hint="₹0.01 to ₹1 trillion, in whole paise. Annual rates from 0% to 100%, for 1 to 600 whole months." />
       <div className="tool-form-grid">
         <NumberField id="loan-rate" label="Annual interest rate (%)" value={rate} onChange={setRate} min={0} max={100} step="any" />
@@ -359,6 +360,7 @@ export function LoanCalculator() {
       <ToolActions onReset={reset} calculateLabel="Calculate repayment plan" />
       <ErrorNotice message={calc.error} />
     </form>
+    <p className="result-supporting">Changing any loan input clears the schedule. Recalculate to generate an updated repayment plan.</p>
     {calc.result && <ResultPanel copyText={copyText}>
       <ResultStat label="Monthly payment" value={formatAmount(calc.result.monthlyPayment)} prominent />
       <div className="result-stat-grid"><ResultStat label="Total interest" value={formatAmount(calc.result.totalInterest)} /><ResultStat label="Total repayment" value={formatAmount(calc.result.totalPayment)} /></div>

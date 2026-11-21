@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
-  calculateGSTBreakdown, calculateLoan, convertUnit, loanSummaryToCSV,
+  calculateGSTBreakdown, calculateLoan, convertUnit, formatAmount, loanScheduleToCSV, loanSummaryToCSV,
 } from "../lib/calculations";
 import { calculateSubmission, currentSubmission } from "../lib/submitted-calculation";
 
 const paise = (value: number) => Math.round(value * 100);
+type LoanDraft = { principal: string; rate: string; months: string };
+
+const submitLoan = (draft: LoanDraft) => calculateSubmission(draft, input =>
+  calculateLoan(Number(input.principal), Number(input.rate), Number(input.months)));
+
+const loanCopyText = (result: ReturnType<typeof calculateLoan> | null) => result
+  ? `Monthly payment ${formatAmount(result.monthlyPayment)}; total interest ${formatAmount(result.totalInterest)}; total payment ${formatAmount(result.totalPayment)}.`
+  : null;
+
+const loanCsv = (result: ReturnType<typeof calculateLoan> | null) => result ? loanScheduleToCSV(result) : null;
 
 test("editing EMI terms invalidates the result and an existing export retains its submitted terms", () => {
   const draft = { principal: "500000", rate: "9", months: "60" };
@@ -19,6 +30,74 @@ test("editing EMI terms invalidates the result and an existing export retains it
   assert.match(csv, /^Loan amount,500000\.00\r\nAnnual interest rate,9%\r\nTerm in months,60\r\nMonthly EMI,10379\.18\r\n/);
   assert.equal(csv.trimEnd().split("\r\n").length, 68);
   assert.match(loanSummaryToCSV(submit().value), /^Loan amount,600000\.00/);
+});
+
+for (const [label, field, editedValue] of [
+  ["loan amount", "principal", "350000"],
+  ["interest rate", "rate", "8.5"],
+  ["loan duration", "months", "48"],
+] as const) {
+  test(`editing ${label} hides stale loan schedule, copy and export until recalculation`, () => {
+    const draft: LoanDraft = { principal: "300000", rate: "10", months: "36" };
+    const oldSubmission = submitLoan(draft);
+    const oldResult = currentSubmission(oldSubmission, draft)?.value ?? null;
+    assert.ok(oldResult);
+
+    draft[field] = editedValue;
+    const visibleResult = currentSubmission(oldSubmission, draft)?.value ?? null;
+    assert.equal(visibleResult, null);
+    assert.equal(loanCopyText(visibleResult), null);
+    assert.equal(loanCsv(visibleResult), null);
+
+    const recalculated = submitLoan(draft);
+    const newResult = currentSubmission(recalculated, draft)?.value;
+    assert.ok(newResult);
+    assert.deepEqual(newResult.inputs, {
+      principal: Number(draft.principal),
+      annualRatePercent: Number(draft.rate),
+      months: Number(draft.months),
+    });
+    assert.equal(newResult.schedule.length, Number(draft.months));
+
+    const expectedCopy = `Monthly payment ${formatAmount(newResult.monthlyPayment)}; total interest ${formatAmount(newResult.totalInterest)}; total payment ${formatAmount(newResult.totalPayment)}.`;
+    assert.equal(loanCopyText(newResult), expectedCopy);
+    const csv = loanCsv(newResult);
+    assert.ok(csv);
+    const rows = csv.split("\r\n");
+    assert.equal(rows.length, Number(draft.months) + 1);
+    assert.match(rows[0], /^Month,Payment,Principal,Interest,Remaining balance$/);
+    assert.equal(rows.at(-1)?.split(",")[0], `${draft.months}.00`);
+    assert.equal(rows.at(-1)?.endsWith(",0.00"), true);
+
+    const summary = loanSummaryToCSV(newResult);
+    assert.match(summary, new RegExp(`^Loan amount,${Number(draft.principal).toFixed(2)}\\r\\nAnnual interest rate,${draft.rate}%\\r\\nTerm in months,${draft.months}\\r\\n`));
+    assert.ok(summary.includes(`Monthly EMI,${newResult.monthlyPayment.toFixed(2)}`));
+    assert.ok(summary.includes(`Total interest,${newResult.totalInterest.toFixed(2)}`));
+    assert.ok(summary.includes(`Total repayment,${newResult.totalPayment.toFixed(2)}`));
+  });
+}
+
+test("reset restores default loan inputs and leaves no current schedule or result actions", () => {
+  const defaults: LoanDraft = { principal: "300000", rate: "10", months: "36" };
+  const staleSubmission = submitLoan(defaults);
+  const editedDraft: LoanDraft = { principal: "450000", rate: "8", months: "48" };
+  assert.equal(currentSubmission(staleSubmission, editedDraft), null);
+  const resetDraft = { ...defaults };
+  const afterReset: ReturnType<typeof submitLoan> | null = null;
+
+  assert.deepEqual(resetDraft, defaults);
+  const resetSubmission = currentSubmission<LoanDraft, ReturnType<typeof calculateLoan>>(afterReset, resetDraft);
+  assert.equal(resetSubmission, null);
+  assert.equal(loanCopyText(null), null);
+  assert.equal(loanCsv(null), null);
+  // Returning to the original submitted values could otherwise resurrect a matching snapshot.
+  assert.equal(currentSubmission(staleSubmission, resetDraft), staleSubmission);
+
+  const component = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const loanCalculator = component.split("export function LoanCalculator() {")[1]?.split("\n}\n")[0] ?? "";
+  assert.match(component, /function useReset\([\s\S]*?resetForm\(\);\s*resetCalculation\(\);/u);
+  assert.match(loanCalculator, /const reset = useReset\(\(\) => \{ setPrincipal\("300000"\); setRate\("10"\); setMonths\("36"\); \}, calc\.reset\);/u);
+  assert.match(loanCalculator, /<form noValidate className="tool-form" onSubmit=\{calc\.submit\} onChange=\{calc\.reset\}>/u);
 });
 
 test("editing a GST rate invalidates the old result and preserves its original tax and label", () => {
