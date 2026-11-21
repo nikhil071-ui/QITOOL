@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   addDaysToDate, calculateAge, calculateBMI, calculateDateDifference, calculateDiscount,
   calculateEMI, calculateGST, calculateLoan, calculateLoanTenureComparison, calculatePercentage, calculateTypingMetrics,
-  convertUnit, countCharacters, countText, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
+  convertUnit, countCharacters, countText, formatDiscountResult, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
 } from "../lib/calculations";
 
 test("age calculator handles exact calendar ages, birthdays, and leap days", () => {
@@ -190,11 +190,41 @@ test("date calculator counts elapsed days and crosses leap-day boundaries", () =
 });
 
 test("discount handles free, full-price, and full-discount edges", () => {
-  assert.deepEqual(calculateDiscount(2500, 20), { savings: 500, finalPrice: 2000, discountPercent: 20 });
+  assert.deepEqual(calculateDiscount(2500, 20), { originalPrice: 2500, savings: 500, finalPrice: 2000, discountPercent: 20 });
   assert.equal(calculateDiscount(120, 0).finalPrice, 120);
   assert.equal(calculateDiscount(120, 100).finalPrice, 0);
   assert.throws(() => calculateDiscount(100, -1), /Discount percentage/);
   assert.throws(() => calculateDiscount(100, 100.1), /Discount percentage/);
+});
+
+test("discount rounds fractional prices and percentages consistently to paise", () => {
+  const result = calculateDiscount(19.994, 12.5);
+  assert.deepEqual(result, { originalPrice: 19.99, savings: 2.5, finalPrice: 17.49, discountPercent: 12.5 });
+  assert.equal(Math.round(result.originalPrice * 100), Math.round(result.savings * 100) + Math.round(result.finalPrice * 100));
+
+  const fractionalRate = calculateDiscount(123.456, 12.345);
+  assert.deepEqual(fractionalRate, { originalPrice: 123.46, savings: 15.24, finalPrice: 108.22, discountPercent: 12.345 });
+  assert.equal(Math.round(fractionalRate.originalPrice * 100), Math.round(fractionalRate.savings * 100) + Math.round(fractionalRate.finalPrice * 100));
+});
+
+test("discount uses half-up paise rounding for very small and half-paise values", () => {
+  assert.deepEqual(calculateDiscount(0.01, 50), { originalPrice: 0.01, savings: 0.01, finalPrice: 0, discountPercent: 50 });
+  assert.deepEqual(calculateDiscount(0.004, 0), { originalPrice: 0, savings: 0, finalPrice: 0, discountPercent: 0 });
+  assert.deepEqual(calculateDiscount(0.005, 0), { originalPrice: 0.01, savings: 0, finalPrice: 0.01, discountPercent: 0 });
+});
+
+test("discount display and copy use the same two-decimal amounts", () => {
+  const result = calculateDiscount(19.994, 12.5);
+  const presentation = formatDiscountResult(result);
+  assert.equal(presentation.originalPriceText, "₹19.99");
+  assert.equal(presentation.savingsText, "₹2.50");
+  assert.equal(presentation.finalPriceText, "₹17.49");
+  assert.equal(presentation.copyText, "Original price: ₹19.99; discount: 12.5%; savings: ₹2.50; final price: ₹17.49.");
+
+  const zeroDiscount = formatDiscountResult(calculateDiscount(10, 0));
+  assert.match(zeroDiscount.copyText, /savings: ₹0\.00; final price: ₹10\.00\./u);
+  const freePrice = formatDiscountResult(calculateDiscount(10, 100));
+  assert.match(freePrice.copyText, /savings: ₹10\.00; final price: ₹0\.00\./u);
 });
 
 test("word and character counters handle whitespace, punctuation, and emoji graphemes", () => {

@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 import {
   addDaysToDate, calculateAge, calculateAgeDifference, calculateBirthdayInfo, calculateBMI,
   calculateDateDifference, calculateDiscount, calculateGSTBreakdown, calculateLoan, calculateLoanTenureComparison,
-  calculatePercentage, formatAmount, formatPercentageResult, formatValue, loanScheduleToCSV, loanSummaryToCSV,
+  calculatePercentage, formatAmount, formatDiscountResult, formatPercentageResult, formatValue, loanScheduleToCSV, loanSummaryToCSV,
   parseNumericInput, weekdayOfDate,
   type BmiUnits, type GstMode, type PercentageMode,
 } from "@/lib/calculations";
@@ -312,7 +312,7 @@ export function DiscountCalculator() {
     event.preventDefault();
     calc.run(() => calculateDiscount(parseNumericInput(price, "Original price"), parseNumericInput(discount, "Discount percentage")));
   };
-  const copyText = calc.result ? `You save ${formatAmount(calc.result.savings)}. Final price: ${formatAmount(calc.result.finalPrice)}.` : "";
+  const presentation = calc.result ? formatDiscountResult(calc.result) : null;
 
   return <>
     <form noValidate className="tool-form" onSubmit={onSubmit}>
@@ -323,9 +323,13 @@ export function DiscountCalculator() {
       <ToolActions onReset={reset} calculateLabel="Calculate discount" />
       <ErrorNotice message={calc.error} />
     </form>
-    {calc.result && <ResultPanel copyText={copyText}>
-      <ResultStat label="Final price" value={formatAmount(calc.result.finalPrice)} prominent />
-      <ResultStat label={`You save (${formatValue(calc.result.discountPercent)}%)`} value={formatAmount(calc.result.savings)} />
+    {calc.result && presentation && <ResultPanel copyText={presentation.copyText}>
+      <ResultStat label="Final price" value={presentation.finalPriceText} prominent />
+      <div className="result-stat-grid">
+        <ResultStat label="Original price" value={presentation.originalPriceText} />
+        <ResultStat label={`You save (${formatValue(calc.result.discountPercent)}%)`} value={presentation.savingsText} />
+      </div>
+      <p className="result-supporting">Amounts are rounded half-up to the nearest paise. Final price equals the rounded original price minus the rounded savings.</p>
     </ResultPanel>}
   </>;
 }

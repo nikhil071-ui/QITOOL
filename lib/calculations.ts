@@ -313,13 +313,55 @@ export function addDaysToDate(dateValue: string, daysToAdd: number): string {
   return `${year.toString().padStart(4, "0")}-${(next.getUTCMonth() + 1).toString().padStart(2, "0")}-${next.getUTCDate().toString().padStart(2, "0")}`;
 }
 
-export type DiscountResult = { savings: number; finalPrice: number; discountPercent: number };
+export type DiscountResult = { originalPrice: number; savings: number; finalPrice: number; discountPercent: number };
+
+function decimalRatio(value: number): { numerator: bigint; denominator: bigint } {
+  const [mantissa, exponentText = "0"] = value.toString().split("e");
+  const [whole, decimals = ""] = mantissa.split(".");
+  let numerator = BigInt(`${whole}${decimals}`);
+  let decimalPlaces = decimals.length - Number(exponentText);
+  if (decimalPlaces < 0) {
+    numerator *= 10n ** BigInt(-decimalPlaces);
+    decimalPlaces = 0;
+  }
+  return { numerator, denominator: 10n ** BigInt(decimalPlaces) };
+}
+
+function roundPositiveRatioHalfUp(numerator: bigint, denominator: bigint): bigint {
+  return (2n * numerator + denominator) / (2n * denominator);
+}
 
 export function calculateDiscount(price: number, discountPercent: number): DiscountResult {
   requireRange(price, "Original price", 0, 1_000_000_000_000);
   requireRange(discountPercent, "Discount percentage", 0, 100);
-  const savings = price * (discountPercent / 100);
-  return { savings, finalPrice: price - savings, discountPercent };
+  const priceRatio = decimalRatio(price);
+  const originalPaise = roundPositiveRatioHalfUp(priceRatio.numerator * 100n, priceRatio.denominator);
+  const percentRatio = decimalRatio(discountPercent);
+  const savingsPaise = roundPositiveRatioHalfUp(originalPaise * percentRatio.numerator, percentRatio.denominator * 100n);
+  const finalPaise = originalPaise - savingsPaise;
+  return {
+    originalPrice: Number(originalPaise) / 100,
+    savings: Number(savingsPaise) / 100,
+    finalPrice: Number(finalPaise) / 100,
+    discountPercent,
+  };
+}
+
+export type DiscountPresentation = { originalPriceText: string; savingsText: string; finalPriceText: string; copyText: string };
+
+export function formatDiscountResult(result: DiscountResult): DiscountPresentation {
+  const currency = new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2,
+  });
+  const originalPriceText = currency.format(result.originalPrice);
+  const savingsText = currency.format(result.savings);
+  const finalPriceText = currency.format(result.finalPrice);
+  return {
+    originalPriceText,
+    savingsText,
+    finalPriceText,
+    copyText: `Original price: ${originalPriceText}; discount: ${formatValue(result.discountPercent)}%; savings: ${savingsText}; final price: ${finalPriceText}.`,
+  };
 }
 
 function countGraphemes(text: string): number {

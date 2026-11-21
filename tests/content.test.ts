@@ -25,6 +25,16 @@ test("the discount GST FAQ links to the registered GST calculator", () => {
   assert.ok(tools.some(tool => `/tools/${tool.slug}` === link.href));
 });
 
+test("the discount result displays and copies the same rounded price presentation", () => {
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const component = source.split("export function DiscountCalculator() {")[1]?.split("\n}")[0] ?? "";
+  assert.match(component, /formatDiscountResult\(calc\.result\)/u);
+  assert.match(component, /ResultPanel copyText=\{presentation\.copyText\}/u);
+  assert.match(component, /presentation\.originalPriceText/u);
+  assert.match(component, /presentation\.savingsText/u);
+  assert.match(component, /presentation\.finalPriceText/u);
+});
+
 test("the EMI worked example matches the calculator to the paise for all three tenures", () => {
   const emi = tools.find(tool => tool.slug === "emi-calculator");
   assert.ok(emi);
