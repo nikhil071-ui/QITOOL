@@ -4,6 +4,7 @@ import {
   addDaysToDate, calculateAge, calculateBMI, calculateDateDifference, calculateDiscount,
   calculateEMI, calculateGST, calculateLoan, calculateLoanTenureComparison, calculatePercentage, calculateTypingMetrics,
   convertUnit, countCharacters, countText, formatDiscountResult, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
+  type UnitCategory,
 } from "../lib/calculations";
 
 test("age calculator handles exact calendar ages, birthdays, and leap days", () => {
@@ -267,4 +268,55 @@ test("unit conversion uses correct temperature offsets and metric factors", () =
   assert.throws(() => convertUnit(-1, "length", "metre", "foot"), /cannot be negative/);
   assert.throws(() => convertUnit(-1, "temperature", "kelvin", "celsius"), /absolute zero/);
   assert.throws(() => convertUnit(5, "length", "kilometre", "gallon"), /valid units/);
+});
+
+test("unit options are unique and same-unit conversions preserve the input exactly", () => {
+  for (const category of Object.keys(unitOptions) as UnitCategory[]) {
+    const options = unitOptions[category];
+    const values = options.map((unit) => unit.value);
+    assert.equal(new Set(values).size, values.length, `${category} has duplicate unit options`);
+    for (const unit of options) {
+      assert.equal(convertUnit(12.345, category, unit.value, unit.value), 12.345, `${category}: ${unit.value}`);
+    }
+  }
+
+  assert.equal(convertUnit(Number.MIN_VALUE, "length", "mile", "mile"), Number.MIN_VALUE);
+  assert.equal(convertUnit(1e308, "length", "mile", "mile"), 1e308);
+  assert.equal(convertUnit(1e308, "temperature", "fahrenheit", "fahrenheit"), 1e308);
+  assert.throws(() => convertUnit(-1, "length", "metre", "metre"), /cannot be negative/);
+  assert.throws(() => convertUnit(-274, "temperature", "celsius", "celsius"), /absolute zero/);
+});
+
+test("intentional equivalent-unit factors convert consistently in both directions", () => {
+  const ratios: [UnitCategory, string, string, number][] = [
+    ["length", "inch", "foot", 1 / 12],
+    ["length", "foot", "yard", 1 / 3],
+    ["length", "yard", "mile", 1 / 1760],
+    ["weight", "ounce", "pound", 1 / 16],
+    ["volume", "cup", "pint", 1 / 2],
+    ["volume", "pint", "gallon", 1 / 8],
+  ];
+
+  for (const [category, from, to, expected] of ratios) {
+    const forward = convertUnit(1, category, from, to);
+    const backward = convertUnit(1, category, to, from);
+    assert.ok(Math.abs(forward - expected) < 1e-14, `${from} to ${to}`);
+    assert.ok(Math.abs(backward - 1 / expected) < 1e-12, `${to} to ${from}`);
+  }
+
+  assert.ok(Math.abs(convertUnit(1, "volume", "gallon", "imperialGallon") - 3.785411784 / 4.54609) < 1e-14);
+  assert.ok(Math.abs(convertUnit(1, "volume", "imperialGallon", "gallon") - 4.54609 / 3.785411784) < 1e-14);
+});
+
+test("all supported conversion pairs round-trip within floating-point precision", () => {
+  for (const category of Object.keys(unitOptions) as UnitCategory[]) {
+    const value = 12.345;
+    for (const from of unitOptions[category]) {
+      for (const to of unitOptions[category]) {
+        const converted = convertUnit(value, category, from.value, to.value);
+        const returned = convertUnit(converted, category, to.value, from.value);
+        assert.ok(Math.abs(returned - value) <= 1e-10 * Math.max(1, Math.abs(value)), `${category}: ${from.value} to ${to.value} and back`);
+      }
+    }
+  }
 });

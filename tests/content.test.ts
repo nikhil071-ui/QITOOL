@@ -121,7 +121,12 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   const unitConverter = getArticle("unit-converter");
   assert.match(unitConverter.seoDescription, /imperial gallons/u);
   assert.match(unitConverter.example.details, /4\.54609 litres/u);
-  assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /3\.785411784 litres.*4\.54609 litres/u);
+  assert.match(unitConverter.example.details, /3\.785411784 litres/u);
+  assert.match(unitConverter.resultExplanation, /eight significant digits.*displayed result may be rounded/u);
+  const gallonCopy = [unitConverter.example.details, unitConverter.resultExplanation, ...unitConverter.faqs.map(faq => faq.answer)].join(" ");
+  assert.equal(gallonCopy.match(/3\.785411784/gu)?.length, 1);
+  assert.equal(gallonCopy.match(/4\.54609/gu)?.length, 1);
+  assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /Select the system stated on the source label/u);
 });
 
 test("BMI content states its 20+ age scope and places CDC guidance beside classification", () => {

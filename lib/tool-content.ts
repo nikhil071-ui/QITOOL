@@ -220,9 +220,9 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     whatItDoes: "Length, mass, and volume are converted through their base-unit factors. Temperature uses offset formulas: °F = (°C × 9/5) + 32, and K = °C + 273.15. This avoids treating temperature like a simple scale multiplier.",
     instructions: ["Choose a measurement category.", "Enter a value and select the units to convert from and to. For gallons, choose US liquid gallon or imperial gallon explicitly.", "Select Convert to view the result. Reset restores the default length example."],
     example: { title: "Convert 1 imperial gallon to litres", details: "One imperial gallon is 4.54609 litres. The US liquid gallon is smaller at 3.785411784 litres." },
-    resultExplanation: "Length, mass and volume use their stated conversion factors. One US liquid gallon is 3.785411784 litres. One imperial gallon is 4.54609 litres. Results show up to eight significant digits; a displayed rounded value may not preserve all internal precision.",
+    resultExplanation: "Length, mass and volume use their stated conversion factors, while temperature conversions account for offset. Results show up to eight significant digits, so the displayed result may be rounded from the full conversion value.",
     faqs: [
-      { question: "What is the difference between a US and an imperial gallon?", answer: "One US liquid gallon is 3.785411784 litres. One imperial gallon is 4.54609 litres. Select the system stated on the source label before converting." },
+      { question: "What is the difference between a US and an imperial gallon?", answer: "US liquid and imperial gallons are separate units with different sizes. Select the system stated on the source label; the calculator keeps those choices distinct." },
       { question: "Why is Kelvin conversion different?", answer: "One kelvin is the same size as one degree Celsius. The zero points differ, so 0 °C equals 273.15 K. Fahrenheit also uses a different degree size." },
     ],
     related: ["bmi-calculator"],

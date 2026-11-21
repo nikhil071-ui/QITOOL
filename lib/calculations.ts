@@ -463,10 +463,12 @@ export function convertUnit(value: number, category: UnitCategory, from: string,
   if (!allowedUnits.includes(from) || !allowedUnits.includes(to)) throw new Error("Choose valid units in the selected category.");
   if (category !== "temperature" && value < 0) throw new Error("This measurement cannot be negative.");
 
+  if (category === "temperature" && ((from === "kelvin" && value < 0) || (from === "celsius" && value < -273.15) || (from === "fahrenheit" && value < -459.67))) {
+    throw new Error("Temperature cannot be below absolute zero.");
+  }
+  if (from === to) return value;
+
   if (category === "temperature") {
-    if ((from === "kelvin" && value < 0) || (from === "celsius" && value < -273.15) || (from === "fahrenheit" && value < -459.67)) {
-      throw new Error("Temperature cannot be below absolute zero.");
-    }
     let celsius: number;
     if (from === "celsius") celsius = value;
     else if (from === "fahrenheit") celsius = (value - 32) * (5 / 9);
