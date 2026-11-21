@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   addDaysToDate, calculateAge, calculateBMI, calculateDateDifference, calculateDiscount,
   calculateEMI, calculateGST, calculateLoan, calculateLoanTenureComparison, calculatePercentage, calculateTypingMetrics,
-  convertUnit, countCharacters, countText, formatDiscountResult, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
+  convertUnit, countCharacters, countParagraphs, countText, formatDiscountResult, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
   type UnitCategory,
 } from "../lib/calculations";
 
@@ -238,6 +238,14 @@ test("word and character counters handle whitespace, punctuation, and emoji grap
   assert.equal(characters.words, 1);
   assert.equal(characters.lines, 2);
   assert.equal(countCharacters("").lines, 0);
+});
+
+test("word counter splits paragraphs only at blank lines and handles punctuation and empty text", () => {
+  const text = ["First line.", "Still same paragraph!", "", "Second paragraph?"].join("\n");
+  assert.deepEqual(countText(text), { words: 7, characters: 52, charactersWithoutWhitespace: 45, sentences: 3, readingMinutes: 1 });
+  assert.equal(countParagraphs(text), 2);
+  assert.equal(countParagraphs(" \n \t \n"), 0);
+  assert.deepEqual(countText("Wait... what?!"), { words: 2, characters: 14, charactersWithoutWhitespace: 13, sentences: 2, readingMinutes: 1 });
 });
 
 test("typing speed returns correct and raw WPM with exact-position accuracy", () => {

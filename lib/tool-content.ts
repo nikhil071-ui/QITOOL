@@ -160,7 +160,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Paste the part of your draft that counts toward a word limit. The totals update as you edit, alongside a paragraph count and an estimated reading time rounded up to whole minutes.",
     whatItDoes: "Words use Unicode-aware word segmentation when available. Characters are counted as visible graphemes, paragraphs are non-empty text blocks separated by a blank line, and reading time is estimated at 200 words per minute, rounded up for non-empty text.",
     instructions: ["Paste or type text into the editor.", "Review live words, characters, characters without whitespace, sentences, paragraphs, and reading time.", "Copy the summary if needed, or use Clear text to empty the editor."],
-    example: { title: "A 400-word article", details: "At the default reading pace of 200 words per minute, the estimated reading time is 2 minutes." },
+    example: { title: "Count a short sample", details: "Input: “Count these words. Spaces matter!” Output: 5 words; 33 characters; 29 characters without whitespace; 2 sentences; 1 paragraph; estimated reading time: 1 minute." },
     resultExplanation: "Word boundaries can vary by language and writing system. A paragraph means a non-empty block separated from the next block by a blank line. The reading-time estimate is a guide; actual speed varies by reader and text difficulty.",
     faqs: [
       { question: "Is my text sent anywhere?", answer: "No. The counter works in the current page and does not save or transmit the text." },

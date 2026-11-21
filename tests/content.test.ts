@@ -5,7 +5,7 @@ import { tools } from "../lib/tools";
 import { getToolArticle, toolArticles } from "../lib/tool-content";
 import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
-import { calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, formatAmount } from "../lib/calculations";
+import { calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount } from "../lib/calculations";
 
 test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
   const { example, whatItDoes } = toolArticles["gst-calculator"];
@@ -127,6 +127,25 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   assert.equal(gallonCopy.match(/3\.785411784/gu)?.length, 1);
   assert.equal(gallonCopy.match(/4\.54609/gu)?.length, 1);
   assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /Select the system stated on the source label/u);
+});
+
+test("Word Counter example output matches its sample text and displayed counters", () => {
+  const article = toolArticles["word-counter"];
+  const match = article.example.details.match(/^Input: “([^”]+)” Output: (.+)$/u);
+  assert.ok(match, "the example must include concrete sample text and output");
+  const sample = match[1];
+  const counts = countText(sample);
+  const paragraphs = countParagraphs(sample);
+  const expected = `Input: “${sample}” Output: ${counts.words} words; ${counts.characters} characters; ${counts.charactersWithoutWhitespace} characters without whitespace; ${counts.sentences} sentences; ${paragraphs} paragraph${paragraphs === 1 ? "" : "s"}; estimated reading time: ${counts.readingMinutes} minute${counts.readingMinutes === 1 ? "" : "s"}.`;
+  assert.equal(article.example.details, expected);
+
+  const source = readFileSync("components/tools/text-tools.tsx", "utf8");
+  const component = source.split("export function WordCounter() {")[1]?.split("\n}")[0] ?? "";
+  assert.match(component, /const result = countText\(text\)/u);
+  assert.match(component, /const paragraphs = countParagraphs\(text\)/u);
+  for (const summaryField of ["result.words", "result.characters", "result.charactersWithoutWhitespace", "result.sentences", "paragraphs", "result.readingMinutes"]) {
+    assert.ok(component.includes(summaryField), `copy summary should use ${summaryField}`);
+  }
 });
 
 test("BMI content states its 20+ age scope and places CDC guidance beside classification", () => {
