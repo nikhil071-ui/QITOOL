@@ -241,7 +241,10 @@ export function GstCalculator() {
       <SelectField id="gst-structure" label="Tax display" value={structure} onChange={value => setStructure(value as "single" | "split")} options={[{ value: "single", label: "Show total GST" }, { value: "split", label: "Split into CGST + SGST" }]} hint="Use the split for applicable intra-state supplies; confirm the correct tax treatment and rate for your transaction." />
       <div className="tool-form-grid">
         <NumberField id="gst-amount" label={mode === "add" ? "Amount before GST (₹)" : "Amount including GST (₹)"} value={amount} onChange={setAmount} min={0} step={0.01} hint="Enter rupees and paise (up to two decimal places)." />
-        <SelectField id="gst-rate" label="GST rate" value={rate} onChange={setRate} options={gstRates} />
+        <div>
+          <SelectField id="gst-rate" label="GST rate" value={rate} onChange={setRate} options={gstRates} />
+          <p className="tool-field-hint">Source: <a className="inline-link" href="https://www.gstcouncil.gov.in/cgst-rate-notification">GST Council rate notifications</a></p>
+        </div>
         {rate === "custom" && <NumberField id="gst-custom-rate" label="Custom GST rate (%)" value={customRate} onChange={setCustomRate} min={0} max={100} />}
       </div>
       <ToolActions onReset={reset} calculateLabel="Calculate GST" />

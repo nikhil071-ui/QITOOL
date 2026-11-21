@@ -17,6 +17,20 @@ test("the reverse GST example matches Remove GST for an inclusive invoice", () =
   assert.ok(example.details.includes(`₹${gstAmount} is GST`));
 });
 
+test("GST rate notifications are linked beside the rate selector", () => {
+  const gstGuide = categoryGuides.calculators.find(lesson => lesson.id === "gst-inclusive-price");
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const component = source.split("export function GstCalculator() {")[1]?.split("\nexport function DateCalculator")[0] ?? "";
+  const rateSelectorPosition = component.indexOf('<SelectField id="gst-rate"');
+  const sourceLinkPosition = component.indexOf('href="https://www.gstcouncil.gov.in/cgst-rate-notification"', rateSelectorPosition);
+
+  assert.equal(gstGuide?.source?.url, "https://www.gstcouncil.gov.in/cgst-rate-notification");
+  assert.equal(gstGuide?.source?.label, "GST Council rate notifications");
+  assert.ok(rateSelectorPosition >= 0 && sourceLinkPosition > rateSelectorPosition && sourceLinkPosition - rateSelectorPosition < 300,
+    "the official source should appear with the GST rate selector");
+  assert.match(component.slice(sourceLinkPosition), />GST Council rate notifications<\/a>/u);
+});
+
 test("the discount GST FAQ links to the registered GST calculator", () => {
   const link = toolArticles["discount-calculator"].faqs.find(item => item.question === "Does the result include GST?")?.link;
   assert.ok(link);
