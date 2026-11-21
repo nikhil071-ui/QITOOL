@@ -5,7 +5,7 @@ import { tools } from "../lib/tools";
 import { getToolArticle, toolArticles } from "../lib/tool-content";
 import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
-import { calculateAge, calculateBirthdayInfo, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
+import { addDaysToDate, calculateAge, calculateBirthdayInfo, calculateDateDifference, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
 
 test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
   const { example, whatItDoes } = toolArticles["gst-calculator"];
@@ -150,6 +150,30 @@ test("Age Calculator example, weekday and result wiring match the actual date fu
   assert.match(component, /<strong>\{age\?\.years\}<\/strong><span>years<\/span><strong>\{age\?\.months\}<\/strong><span>months<\/span><strong>\{age\?\.days\}<\/strong><span>days<\/span>/u);
   assert.match(component, /Age as of \$\{calc\.result\.referenceDate\}: \$\{age\?\.years\} years, \$\{age\?\.months\} months, \$\{age\?\.days\} days/u);
   assert.match(component, /born \$\{calc\.result\.birthday\.birthWeekday\}/u);
+});
+
+test("Date Calculator example, direction and copied result match the date functions", () => {
+  const article = toolArticles["date-calculator"];
+  const startDate = "2026-01-01";
+  const endDate = "2026-01-10";
+  assert.match(article.example.title, /1 January to 10 January/u);
+
+  const interval = calculateDateDifference(startDate, endDate);
+  assert.deepEqual(interval, { days: 9, inclusiveDays: 10, weeks: 1, remainingDays: 2, direction: "after" });
+  assert.equal(article.example.details, `There are ${interval.days} elapsed days when the start date is day zero, or ${interval.inclusiveDays} days when both the start and end dates are counted.`);
+  assert.equal(addDaysToDate(startDate, interval.days), endDate);
+  assert.deepEqual(calculateDateDifference(endDate, startDate), { ...interval, direction: "before" });
+  assert.equal(addDaysToDate(endDate, -interval.days), startDate);
+
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const component = source.split("export function DateCalculator() {")[1]?.split("\nexport function DiscountCalculator")[0] ?? "";
+  assert.match(component, /calculateDateDifference\(firstDate, secondDate\)/u);
+  assert.match(component, /elapsedDays: result\.days, inclusiveDays: result\.inclusiveDays/u);
+  assert.match(component, /copyText: `\$\{elapsedLabel\}; \$\{inclusiveLabel\}, counting both dates\. \$\{detail\}`/u);
+  assert.match(component, /ResultPanel copyText=\{calc\.result\.copyText\}/u);
+  assert.match(component, /calc\.result\.elapsedDays/u);
+  assert.match(component, /calc\.result\.inclusiveDays/u);
+  assert.match(component, /\{calc\.result\.detail\}/u);
 });
 
 test("Word Counter example output matches its sample text and displayed counters", () => {
