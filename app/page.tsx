@@ -15,13 +15,13 @@ export const metadata = pageMetadata("Free Online Calculators and Browser Tools 
 
 const benefits = [
   { icon: Zap, title: "Quick by design", copy: "Useful answers without the extra steps." },
-  { icon: ShieldCheck, title: "Privacy minded", copy: "Tools process inputs in your browser without an account." },
+  { icon: ShieldCheck, title: "Privacy minded", copy: "Tools process inputs in your browser." },
   { icon: WandSparkles, title: "Easy to understand", copy: "Clear inputs, helpful context, and readable results." },
 ];
 
 const faqs = [
-  { question: "What is QITOOL?", answer: "QITOOL is a collection of practical online tools for everyday calculations, text tasks, image needs, password and QR generation, and unit conversions." },
-  { question: "Are the tools free to use?", answer: "Yes. QITOOL's current tools are free to use, with no account required." },
+  { question: "What is QITOOL?", answer: "QITOOL brings practical browser-based tools together in one place." },
+  { question: "Are the tools free to use?", answer: "Yes. The tools listed here are free to use." },
   { question: "Do I need to create an account?", answer: "No. The tools work in your browser without an account. Inputs are not saved by QITOOL." },
 ];
 
@@ -37,9 +37,9 @@ export default function HomePage() {
           <div className="hero-copy">
             <Image src="/brand/logo.png" alt="QITOOL – Smart Tools. Simple Life." width={1800} height={520} className="homepage-brand-logo logo-on-light" sizes="(max-width: 700px) 70vw, 300px" />
             <Image src="/brand/logo-dark.png" alt="QITOOL – Smart Tools. Simple Life." width={1800} height={520} className="homepage-brand-logo logo-on-dark" sizes="(max-width: 700px) 70vw, 300px" />
-            <p className="hero-kicker"><span className="hero-kicker-icon"><Zap size={13} aria-hidden="true" /></span> YOUR EVERYDAY DIGITAL TOOLKIT</p>
+            <p className="hero-kicker"><span className="hero-kicker-icon"><Zap size={13} aria-hidden="true" /></span> TOOLS FOR THE TASK AT HAND</p>
             <h1>Free calculators <br /><span>and everyday tools.</span></h1>
-            <p className="hero-description">Calculate dates and loan payments, count words, convert units or compress an image. Choose a tool to get started.</p>
+            <p className="hero-description">Calculate dates and loan payments, count words, convert units, or compress an image.</p>
             <div className="hero-actions">
               <Link href="/tools" className="button-primary">Explore All Tools <ArrowRight size={16} aria-hidden="true" /></Link>
               <Link href="/about" className="button-secondary">Discover QITOOL <ArrowUpRight size={15} aria-hidden="true" /></Link>
@@ -98,15 +98,15 @@ export default function HomePage() {
           <div className="section-heading section-heading-centered">
             <p className="eyebrow"><span className="eyebrow-line" /> A PLACE FOR EVERY TASK <span className="eyebrow-line" /></p>
             <h2>Tools and guides by category</h2>
-            <p className="section-description">Browse a category for tools and worked examples, from checking a GST-inclusive price to fitting an image within a file limit.</p>
+            <p className="section-description">Worked examples show how to check a GST-inclusive price or fit an image within a file limit.</p>
           </div>
           <div className="category-grid">
             {toolCategories.slice(1).map((category, index) => {
               const descriptions: Record<string, string> = {
                 calculators: "Everyday numbers, dates, and decisions",
                 text: "Writing helpers that keep things moving",
-                images: "Helpful tools for common image tasks",
-                productivity: "Small utilities for a smoother workflow",
+                images: "Compress images or generate QR codes",
+                productivity: "Practise typing or generate a password",
                 converters: "Quick conversions with clear units",
               };
               const categoryIcon = String(index + 1).padStart(2, "0");
@@ -127,8 +127,8 @@ export default function HomePage() {
         <div className="page-shell why-layout">
           <div className="why-copy">
             <p className="eyebrow"><span className="eyebrow-line" /> OUR PROMISE</p>
-            <h2>Useful should feel simple.</h2>
-            <p>We think the best tools get out of your way. Each tool answers a practical question, explains its result, and keeps the next step clear.</p>
+            <h2>From a quick check to a closer comparison.</h2>
+            <p>Some tasks need a single answer; others call for comparing options. Find the tool that fits.</p>
             <Link href="/about" className="inline-link">A little more about us <ArrowRight size={15} aria-hidden="true" /></Link>
           </div>
           <div className="benefit-list">

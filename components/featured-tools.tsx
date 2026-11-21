@@ -17,7 +17,7 @@ export function FeaturedTools() {
             <h2 id="featured-heading">A useful place to start.</h2>
             <p className="section-description">A small, curated selection from the full QITOOL collection.</p>
           </div>
-          <Link href="/tools" className="inline-link">Explore all tools <ArrowRight size={15} aria-hidden="true" /></Link>
+          <Link href="/tools" className="inline-link">Browse the full collection <ArrowRight size={15} aria-hidden="true" /></Link>
         </div>
         <div className="tool-grid featured-grid">
           {featuredTools.map((tool, index) => <ToolCard key={tool.slug} tool={tool} index={index} />)}

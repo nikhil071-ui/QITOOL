@@ -25,6 +25,25 @@ test("the discount GST FAQ links to the registered GST calculator", () => {
   assert.ok(tools.some(tool => `/tools/${tool.slug}` === link.href));
 });
 
+test("homepage copy avoids repeated prompts and uses distinct category descriptions", () => {
+  const homepage = readFileSync("app/page.tsx", "utf8");
+  const featured = readFileSync("components/featured-tools.tsx", "utf8");
+  assert.match(homepage, /TOOLS FOR THE TASK AT HAND/u);
+  assert.doesNotMatch(homepage, /YOUR EVERYDAY DIGITAL TOOLKIT/u);
+  assert.match(homepage, /Calculate dates and loan payments, count words, convert units, or compress an image\./u);
+  assert.doesNotMatch(homepage, /Choose a tool to get started/u);
+  assert.match(homepage, /Tools process inputs in your browser\./u);
+  assert.match(homepage, /Yes\. The tools listed here are free to use\./u);
+  assert.doesNotMatch(homepage, /free to use, with no account required/u);
+  assert.match(homepage, /No\. The tools work in your browser without an account/u);
+  assert.match(homepage, /Worked examples show how to check a GST-inclusive price or fit an image within a file limit\./u);
+  assert.match(homepage, /Compress images or generate QR codes/u);
+  assert.match(homepage, /Practise typing or generate a password/u);
+  assert.match(homepage, /Some tasks need a single answer; others call for comparing options/u);
+  assert.match(homepage, /Link href="\/tools" className="button-primary">Explore All Tools/u);
+  assert.match(featured, /Link href="\/tools" className="inline-link">Browse the full collection/u);
+});
+
 test("the discount result displays and copies the same rounded price presentation", () => {
   const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
   const component = source.split("export function DiscountCalculator() {")[1]?.split("\n}")[0] ?? "";
