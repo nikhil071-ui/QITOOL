@@ -5,7 +5,7 @@ import { tools } from "../lib/tools";
 import { getToolArticle, toolArticles } from "../lib/tool-content";
 import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
-import { calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount } from "../lib/calculations";
+import { calculateAge, calculateBirthdayInfo, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
 
 test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
   const { example, whatItDoes } = toolArticles["gst-calculator"];
@@ -127,6 +127,29 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   assert.equal(gallonCopy.match(/3\.785411784/gu)?.length, 1);
   assert.equal(gallonCopy.match(/4\.54609/gu)?.length, 1);
   assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /Select the system stated on the source label/u);
+});
+
+test("Age Calculator example, weekday and result wiring match the actual date functions", () => {
+  const article = toolArticles["age-calculator"];
+  const birthDate = "1990-03-14";
+  const referenceDate = "2026-11-19";
+  assert.match(article.example.title, /14 March 1990/u);
+  assert.match(article.example.details, /today were 19 November 2026/u);
+
+  const age = calculateAge(birthDate, referenceDate);
+  assert.deepEqual(age, { years: 36, months: 8, days: 5, totalDays: 13399 });
+  assert.ok(article.example.details.includes(`${age.years} years, ${age.months} months, and ${age.days} days`));
+
+  const birthday = calculateBirthdayInfo(birthDate, referenceDate);
+  assert.equal(weekdayOfDate(birthDate), "Wednesday");
+  assert.equal(birthday.birthWeekday, weekdayOfDate(birthDate));
+
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const component = source.split("export function AgeCalculator() {")[1]?.split("\nconst percentageOptions")[0] ?? "";
+  assert.match(component, /ResultPanel copyText=\{copyText\}/u);
+  assert.match(component, /<strong>\{age\?\.years\}<\/strong><span>years<\/span><strong>\{age\?\.months\}<\/strong><span>months<\/span><strong>\{age\?\.days\}<\/strong><span>days<\/span>/u);
+  assert.match(component, /Age as of \$\{calc\.result\.referenceDate\}: \$\{age\?\.years\} years, \$\{age\?\.months\} months, \$\{age\?\.days\} days/u);
+  assert.match(component, /born \$\{calc\.result\.birthday\.birthWeekday\}/u);
 });
 
 test("Word Counter example output matches its sample text and displayed counters", () => {
