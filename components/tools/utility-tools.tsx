@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useReducer, useState, type FormEvent } from "react";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { Download, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { convertUnit, formatValue, parseNumericInput, unitOptions, validateQrContent, type UnitCategory } from "@/lib/calculations";
 import { createQrCodeResult, getQrCodeResultActions, type QrCodeResult } from "@/lib/qr-result";
-import { generateSecurePassword, type PasswordOptions } from "@/lib/password";
+import {
+  generateSecurePassword, initialPasswordVisibilityState, passwordVisibilityReducer, type PasswordOptions,
+} from "@/lib/password";
 import {
   ErrorNotice, NumberField, ResultPanel, SelectField,
   TextField, ToolActions, useSubmittedCalculation,
@@ -17,20 +19,19 @@ const defaultPasswordOptions: PasswordOptions = { lowercase: true, uppercase: tr
 export function PasswordGenerator() {
   const [length, setLength] = useState("16");
   const [options, setOptions] = useState<PasswordOptions>(defaultPasswordOptions);
-  const [password, setPassword] = useState("");
-  const [visible, setVisible] = useState(false);
+  const [passwordState, dispatchPassword] = useReducer(passwordVisibilityReducer, initialPasswordVisibilityState);
   const [error, setError] = useState("");
   const create = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     try {
-      setPassword(generateSecurePassword(parseNumericInput(length, "Password length"), options));
+      dispatchPassword({ type: "generated", password: generateSecurePassword(parseNumericInput(length, "Password length"), options) });
     } catch (cause) {
-      setPassword("");
+      dispatchPassword({ type: "reset" });
       setError(cause instanceof Error ? cause.message : "Could not generate a password.");
     }
   };
-  const reset = () => { setLength("16"); setOptions(defaultPasswordOptions); setPassword(""); setVisible(false); setError(""); };
+  const reset = () => { setLength("16"); setOptions(defaultPasswordOptions); dispatchPassword({ type: "reset" }); setError(""); };
   const toggle = (name: keyof PasswordOptions) => setOptions((current) => ({ ...current, [name]: !current[name] }));
 
   return <>
@@ -42,8 +43,8 @@ export function PasswordGenerator() {
       <ToolActions onReset={reset} calculateLabel="Generate password" />
       <ErrorNotice message={error} />
     </form>
-    {password && <ResultPanel copyText={password} title="Generated password">
-      <div className="password-output"><input aria-label="Generated password" type={visible ? "text" : "password"} value={password} readOnly /><button type="button" className="password-visibility" onClick={() => setVisible((current) => !current)} aria-label={visible ? "Hide password" : "Show password"}>{visible ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
+    {passwordState.password && <ResultPanel copyText={passwordState.password} title="Generated password">
+      <div className="password-output"><input aria-label="Generated password" type={passwordState.visible ? "text" : "password"} value={passwordState.password} readOnly /><button type="button" className="password-visibility" onClick={() => dispatchPassword({ type: "toggle" })} aria-label={passwordState.visible ? "Hide password" : "Show password"}>{passwordState.visible ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
       <p className="result-caution"><ShieldCheck size={15} aria-hidden="true" />Generated here in your browser. Save it in a password manager and do not reuse it.</p>
     </ResultPanel>}
   </>;

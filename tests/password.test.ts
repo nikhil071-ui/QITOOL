@@ -1,6 +1,44 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
-import { generateSecurePassword, type PasswordOptions } from "../lib/password";
+import {
+  generateSecurePassword, initialPasswordVisibilityState, passwordVisibilityReducer, type PasswordOptions,
+} from "../lib/password";
+
+test("password visibility starts masked and reveal/hide controls affect the current password", () => {
+  assert.deepEqual(initialPasswordVisibilityState, { password: "", visible: false });
+  const generated = passwordVisibilityReducer(initialPasswordVisibilityState, { type: "generated", password: "current-test-password" });
+  assert.deepEqual(generated, { password: "current-test-password", visible: false });
+
+  const revealed = passwordVisibilityReducer(generated, { type: "toggle" });
+  assert.deepEqual(revealed, { password: "current-test-password", visible: true });
+  assert.deepEqual(passwordVisibilityReducer(revealed, { type: "toggle" }), generated);
+});
+
+test("regenerating after reveal masks the new password with no visibility carried over", () => {
+  const first = passwordVisibilityReducer(initialPasswordVisibilityState, { type: "generated", password: "first-test-password" });
+  const revealed = passwordVisibilityReducer(first, { type: "toggle" });
+  const second = passwordVisibilityReducer(revealed, { type: "generated", password: "second-test-password" });
+  assert.deepEqual(second, { password: "second-test-password", visible: false });
+
+  const third = passwordVisibilityReducer(passwordVisibilityReducer(second, { type: "toggle" }), { type: "generated", password: "third-test-password" });
+  assert.deepEqual(third, { password: "third-test-password", visible: false });
+});
+
+test("reset after reveal clears the password and restores the masked default", () => {
+  const generated = passwordVisibilityReducer(initialPasswordVisibilityState, { type: "generated", password: "reset-test-password" });
+  const revealed = passwordVisibilityReducer(generated, { type: "toggle" });
+  assert.deepEqual(passwordVisibilityReducer(revealed, { type: "reset" }), initialPasswordVisibilityState);
+});
+
+test("Password Generator uses the visibility reducer for generation, reveal, and reset", () => {
+  const source = readFileSync("components/tools/utility-tools.tsx", "utf8");
+  const generator = source.split("export function PasswordGenerator() {")[1]?.split("\n}\n")[0] ?? "";
+  assert.match(generator, /useReducer\(passwordVisibilityReducer, initialPasswordVisibilityState\)/u);
+  assert.match(generator, /dispatchPassword\(\{ type: "generated", password:/u);
+  assert.match(generator, /dispatchPassword\(\{ type: "toggle" \}\)/u);
+  assert.match(generator, /dispatchPassword\(\{ type: "reset" \}\)/u);
+});
 
 test("password generator returns the selected length and includes every requested set", () => {
   const options: PasswordOptions = { lowercase: true, uppercase: true, numbers: true, symbols: true };

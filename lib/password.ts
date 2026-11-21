@@ -1,5 +1,23 @@
 export type PasswordOptions = { lowercase: boolean; uppercase: boolean; numbers: boolean; symbols: boolean };
 export type SecureRandomSource = Pick<Crypto, "getRandomValues">;
+export type PasswordVisibilityState = { password: string; visible: boolean };
+export type PasswordVisibilityAction =
+  | { type: "generated"; password: string }
+  | { type: "toggle" }
+  | { type: "reset" };
+
+export const initialPasswordVisibilityState: PasswordVisibilityState = { password: "", visible: false };
+
+export function passwordVisibilityReducer(state: PasswordVisibilityState, action: PasswordVisibilityAction): PasswordVisibilityState {
+  switch (action.type) {
+    case "generated":
+      return { password: action.password, visible: false };
+    case "toggle":
+      return state.password ? { ...state, visible: !state.visible } : state;
+    case "reset":
+      return initialPasswordVisibilityState;
+  }
+}
 
 const characterSets: Record<keyof PasswordOptions, string> = {
   lowercase: "abcdefghijklmnopqrstuvwxyz",
