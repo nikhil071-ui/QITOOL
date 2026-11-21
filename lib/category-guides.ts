@@ -55,7 +55,7 @@ export const categoryGuides: Record<ToolCategoryId, Lesson[]> = {
       id: "bmi-measurements", title: "Prepare height and weight for adult BMI",
       paragraphs: [
         "For a height of 1.75 metres, enter 175 in the centimetre field. At 70 kilograms, the calculation is 70 divided by 1.75 squared, or about 22.9. In imperial mode, 5 feet 9 inches goes into the height field as 69 total inches. A weight of 11 stone goes into the pounds field as 154.",
-        "The category uses the unrounded number and the display shows one decimal place. A rounded value close to a cutoff can therefore look like the next category. BMI is one screening measure for adults. Children and teens need age-specific interpretation, and a clinician can consider factors such as muscle mass alongside the result.",
+        "The category uses the unrounded number and the display shows one decimal place. A rounded value close to a cutoff can therefore look like the next category. BMI is one screening measure for adults aged 20 and older only. Children and teens need age-specific interpretation, and a clinician can consider factors such as muscle mass alongside the result.",
       ],
       tools: [{ slug: "bmi-calculator", label: "Calculate adult BMI in metric or imperial units" }],
       source: { url: "https://www.cdc.gov/bmi/adult-calculator/", label: "CDC adult BMI screening guidance" },

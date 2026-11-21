@@ -168,6 +168,7 @@ export function calculateBMI(weight: number, height: number, units: BmiUnits): B
   }
 
   const bmi = kilograms / (metres * metres);
+  // Classify the full-precision result; the component rounds only the displayed value.
   const category = bmi < 18.5 ? "Below the adult reference range" : bmi < 25 ? "Within the adult reference range" : bmi < 30 ? "Above the adult reference range" : "High adult reference range";
   return { bmi, category, unitLabel: "kg/m²" };
 }

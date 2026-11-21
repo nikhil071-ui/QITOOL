@@ -114,6 +114,34 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /3\.785411784 litres.*4\.54609 litres/u);
 });
 
+test("BMI content states its 20+ age scope and places CDC guidance beside classification", () => {
+  const article = toolArticles["bmi-calculator"];
+  assert.match(article.seoDescription, /adults aged 20 and older/u);
+  assert.match(article.introduction, /aged 20 and older only/u);
+  assert.match(article.introduction, /children and teenagers/iu);
+  assert.match(article.whatItDoes, /20 and older, not children or teenagers/u);
+  assert.match(article.resultExplanation, /unrounded BMI/u);
+  assert.match(article.faqs.find(faq => /Who should not use/u.test(faq.question))?.answer ?? "", /aged 20 and older, not children or teenagers/u);
+
+  const bmiGuide = categoryGuides.calculators.find(lesson => lesson.id === "bmi-measurements");
+  assert.ok(bmiGuide);
+  assert.match(bmiGuide.paragraphs.join(" "), /adults aged 20 and older only/u);
+  assert.equal(bmiGuide.source?.url, "https://www.cdc.gov/bmi/adult-calculator/");
+
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const bmiComponent = source.split("export function BmiCalculator() {")[1]?.split("\n}")[0] ?? "";
+  assert.match(bmiComponent, /For adults aged 20 and older only\. Adult BMI categories do not apply to children or teens\./u);
+  assert.match(bmiComponent, /The category uses the full-precision BMI; only the displayed BMI is rounded to one decimal place\./u);
+  assert.match(bmiComponent, /<ResultStat label="Adult screening category" value=\{calc\.result\.category\}/u);
+  assert.match(bmiComponent, /calc\.result\.bmi\.toFixed\(1\)/u);
+
+  const categoryPosition = bmiComponent.indexOf('<ResultStat label="Adult screening category"');
+  const cdcLinkPosition = bmiComponent.indexOf('href="https://www.cdc.gov/bmi/adult-calculator/"', categoryPosition);
+  assert.ok(categoryPosition >= 0 && cdcLinkPosition > categoryPosition && cdcLinkPosition - categoryPosition < 500,
+    "CDC reference should appear immediately beside the category result");
+  assert.match(bmiComponent.slice(cdcLinkPosition), /CDC adult BMI categories and guidance for ages 20\+/u);
+});
+
 test("typing test example uses the first available passage and matches full-timer scoring", () => {
   const article = toolArticles["typing-speed-test"];
   const passage = typingPassages[0];

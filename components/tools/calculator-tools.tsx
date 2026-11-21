@@ -152,9 +152,12 @@ export function BmiCalculator() {
       <ToolActions onReset={reset} calculateLabel="Calculate BMI" />
       <ErrorNotice message={calc.error} />
     </form>
+    <p className="result-supporting">For adults aged 20 and older only. Adult BMI categories do not apply to children or teens.</p>
     {calc.result && <ResultPanel copyText={`BMI ${calc.result.bmi.toFixed(1)} kg per square metre. Adult screening category: ${calc.result.category}.`}>
       <div className="result-highlight">{calc.result.bmi.toFixed(1)}<span> BMI</span></div>
       <ResultStat label="Adult screening category" value={calc.result.category} />
+      <p className="result-supporting">The category uses the full-precision BMI; only the displayed BMI is rounded to one decimal place.</p>
+      <p className="result-supporting"><a className="underline" href="https://www.cdc.gov/bmi/adult-calculator/" target="_blank" rel="noopener noreferrer">CDC adult BMI categories and guidance for ages 20+</a></p>
       <p className="result-caution">BMI is a screening measure, not a diagnosis. It does not account for body composition, pregnancy, age-related factors, or individual health circumstances.</p>
     </ResultPanel>}
   </>;

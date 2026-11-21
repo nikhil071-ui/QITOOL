@@ -84,6 +84,24 @@ test("BMI supports metric and imperial inputs and rejects unsafe values", () => 
   assert.throws(() => calculateBMI(65, 170, "unknown" as "metric"), /Choose metric/);
 });
 
+test("BMI classifications use full precision across cutoffs even when display rounding crosses a cutoff", () => {
+  const cases = [
+    [18.499, "18.5", "Below the adult reference range"],
+    [18.5, "18.5", "Within the adult reference range"],
+    [24.999, "25.0", "Within the adult reference range"],
+    [25, "25.0", "Above the adult reference range"],
+    [29.999, "30.0", "Above the adult reference range"],
+    [30, "30.0", "High adult reference range"],
+  ] as const;
+
+  for (const [weight, displayedBmi, category] of cases) {
+    const result = calculateBMI(weight, 100, "metric");
+    assert.equal(result.bmi, weight);
+    assert.equal(result.bmi.toFixed(1), displayedBmi);
+    assert.equal(result.category, category);
+  }
+});
+
 test("EMI and loan schedule handle zero interest, ordinary rates, and invalid terms", () => {
   const standard = calculateEMI(500000, 9, 60);
   assert.ok(Math.abs(standard.monthlyPayment - 10379.16) < 0.02);
