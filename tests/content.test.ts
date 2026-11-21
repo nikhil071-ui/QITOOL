@@ -5,7 +5,7 @@ import { tools } from "../lib/tools";
 import { getToolArticle, toolArticles } from "../lib/tool-content";
 import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
-import { addDaysToDate, calculateAge, calculateBirthdayInfo, calculateDateDifference, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
+import { addDaysToDate, calculateAge, calculateBirthdayInfo, calculateDateDifference, calculateEMI, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
 
 test("Terms page clearly links to the existing disclaimer route", () => {
   const termsPage = readFileSync("app/terms/page.tsx", "utf8");
@@ -74,6 +74,21 @@ test("the discount result displays and copies the same rounded price presentatio
   assert.match(component, /presentation\.originalPriceText/u);
   assert.match(component, /presentation\.savingsText/u);
   assert.match(component, /presentation\.finalPriceText/u);
+});
+
+test("EMI explanation variables and equation match the amortizing calculation", () => {
+  const { whatItDoes } = toolArticles["emi-calculator"];
+  assert.ok(whatItDoes.includes("EMI = P × i ÷ [1 − (1 + i)^(-n)]"));
+  assert.match(whatItDoes, /P in rupees, monthly rate i as a decimal \(annual nominal rate in percent ÷ 1,200\), and n monthly instalments/u);
+  assert.match(whatItDoes, /At a 0% annual rate, EMI = P ÷ n/u);
+
+  const principal = 500_000;
+  const annualRatePercent = 9;
+  const months = 60;
+  const monthlyRate = annualRatePercent / 1_200;
+  const equationPayment = principal * monthlyRate / (1 - (1 + monthlyRate) ** -months);
+  assert.equal(formatAmount(calculateEMI(principal, annualRatePercent, months).monthlyPayment), formatAmount(equationPayment));
+  assert.equal(calculateEMI(principal, 0, months).monthlyPayment, principal / months);
 });
 
 test("the EMI worked example matches the calculator to the paise for all three tenures", () => {

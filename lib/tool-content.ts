@@ -72,7 +72,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "EMI Calculator for India with Tenure Comparison",
     seoDescription: "Estimate monthly EMI, total repayment and interest in Indian rupees. Compare three loan tenures using the same principal and fixed annual rate.",
     introduction: "Enter a loan amount in Indian rupees, a fixed nominal annual rate and three different tenures in months. Compare monthly EMI, total repayment and interest before considering fees or lender terms.",
-    whatItDoes: "The calculation uses the standard amortizing-loan formula with the annual nominal rate divided into monthly periods. It assumes a fixed rate, equal monthly instalments, and no fees, taxes, or prepayments. The schedule applies each month’s interest to the remaining balance.",
+    whatItDoes: "For a principal P in rupees, monthly rate i as a decimal (annual nominal rate in percent ÷ 1,200), and n monthly instalments, EMI = P × i ÷ [1 − (1 + i)^(-n)]. At a 0% annual rate, EMI = P ÷ n. The calculation assumes a fixed rate and equal monthly instalments, with no fees, taxes, or prepayments; each month's interest is applied to the remaining balance.",
     instructions: ["Enter the loan principal in rupees and a fixed annual interest rate.", "Enter the main tenure and two different comparison tenures as whole months.", "Select Calculate and compare EMI. Review monthly payments and totals, then use the main tenure's schedule or CSV."],
     example: {
       title: "How does tenure affect the cost of a ₹5,00,000 loan?",
