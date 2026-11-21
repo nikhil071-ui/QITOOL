@@ -26,7 +26,7 @@ export default function AboutPage() {
           <h2>Our approach</h2>
           <p>We aim to make inputs, results, methods, and limitations clear. The site does not use testimonials, ratings, or claims of professional authorship. General-purpose calculations are not a substitute for medical, financial, legal, or other professional advice.</p>
           {publisherName && <p>QITOOL is published by {publisherName}.</p>}
-          <p>For corrections and accessibility feedback, visit <Link href="/contact">Contact QITOOL</Link>.</p>
+          <p>For corrections, accessibility issues, privacy concerns, or general feedback, check the <Link href="/contact">Contact page</Link> for the current status of email contact.</p>
           <p>QITOOL is not affiliated with Google. The optional Google Analytics integration only loads after a visitor opts in when it has been configured for a deployment. No advertising code is included. The privacy policy describes the analytics choice and data flow.</p>
           <div className="prose-callout"><Check size={17} aria-hidden="true" /><p>Read the <Link href="/privacy-policy">privacy policy</Link> to see what the site and its hosting provider may process.</p></div>
         </article>
