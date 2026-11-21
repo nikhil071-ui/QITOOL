@@ -5,6 +5,7 @@ import Image from "next/image";
 import QRCode from "qrcode";
 import { Download, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { convertUnit, formatValue, parseNumericInput, unitOptions, validateQrContent, type UnitCategory } from "@/lib/calculations";
+import { createQrCodeResult, getQrCodeResultActions, type QrCodeResult } from "@/lib/qr-result";
 import { generateSecurePassword, type PasswordOptions } from "@/lib/password";
 import {
   ErrorNotice, NumberField, ResultPanel, SelectField,
@@ -91,13 +92,13 @@ export function UnitConverter() {
 
 export function QrCodeGenerator() {
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [result, setResult] = useState<QrCodeResult | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const reset = () => { setContent(""); setImageUrl(""); setError(""); setBusy(false); };
+  const reset = () => { setContent(""); setResult(null); setError(""); setBusy(false); };
   const generate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setImageUrl("");
+    setResult(null);
     setError("");
     let normalized: string;
     try {
@@ -109,13 +110,14 @@ export function QrCodeGenerator() {
     setBusy(true);
     try {
       const dataUrl = await QRCode.toDataURL(normalized, { width: 512, margin: 4, errorCorrectionLevel: "M" });
-      setImageUrl(dataUrl);
+      setResult(createQrCodeResult(normalized, dataUrl));
     } catch {
       setError("This content could not fit into a QR code. Shorten it and try again.");
     } finally {
       setBusy(false);
     }
   };
+  const resultActions = result ? getQrCodeResultActions(result) : null;
 
   return <>
     <form noValidate className="tool-form" onSubmit={generate}>
@@ -123,8 +125,9 @@ export function QrCodeGenerator() {
       <ToolActions onReset={reset} calculateLabel="Generate QR code" busy={busy} />
       <ErrorNotice message={error} />
     </form>
-    {imageUrl && <ResultPanel copyText={content} title="Your QR code">
-      <div className="qr-result"><Image src={imageUrl} alt="Generated QR code preview" width={256} height={256} unoptimized /><p>Scan this preview or download the PNG.</p><a className="download-schedule" href={imageUrl} download="qitool-qr-code.png"><Download size={14} aria-hidden="true" />Download PNG</a></div>
+    {result && resultActions && <ResultPanel copyText={resultActions.copyText} title="Your QR code">
+      <div className="result-stat"><span>Encoded content</span><strong>{result.content}</strong></div>
+      <div className="qr-result"><Image src={resultActions.previewUrl} alt="Generated QR code preview" width={256} height={256} unoptimized /><p>Scan this preview or download the PNG.</p><a className="download-schedule" href={resultActions.downloadUrl} download="qitool-qr-code.png"><Download size={14} aria-hidden="true" />Download PNG</a></div>
     </ResultPanel>}
   </>;
 }
