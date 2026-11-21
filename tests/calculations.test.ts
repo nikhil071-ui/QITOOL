@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   addDaysToDate, calculateAge, calculateBMI, calculateDateDifference, calculateDiscount,
   calculateEMI, calculateGST, calculateLoan, calculateLoanTenureComparison, calculatePercentage, calculateTypingMetrics,
-  convertUnit, countCharacters, countText, loanScheduleToCSV, parseNumericInput, unitOptions,
+  convertUnit, countCharacters, countText, formatPercentageResult, loanScheduleToCSV, parseNumericInput, unitOptions,
 } from "../lib/calculations";
 
 test("age calculator handles exact calendar ages, birthdays, and leap days", () => {
@@ -32,6 +32,45 @@ test("percentage calculator covers each mode and rejects undefined ratios", () =
   assert.throws(() => calculatePercentage("what-percent", 1e308, 1e-308), /too large to calculate safely/);
   assert.throws(() => parseNumericInput(" ", "Amount"), /Enter amount/);
   assert.throws(() => parseNumericInput("Infinity", "Amount"), /valid number/);
+});
+
+test("percentage change wording follows numerical direction with signed baselines", () => {
+  const negativeBaselineIncrease = calculatePercentage("change", -100, -50);
+  assert.equal(negativeBaselineIncrease.value, -50);
+  assert.equal(negativeBaselineIncrease.direction, "increase");
+  assert.deepEqual(formatPercentageResult("change", negativeBaselineIncrease), {
+    displayText: "Increase of 50%",
+    copyText: "Change from -100 to -50: Increase of 50%.",
+  });
+
+  const positiveBaselineIncrease = calculatePercentage("change", 80, 100);
+  assert.equal(positiveBaselineIncrease.direction, "increase");
+  assert.equal(formatPercentageResult("change", positiveBaselineIncrease).displayText, "Increase of 25%");
+
+  const negativeBaselineDecrease = calculatePercentage("change", -100, -150);
+  assert.equal(negativeBaselineDecrease.direction, "decrease");
+  assert.equal(formatPercentageResult("change", negativeBaselineDecrease).displayText, "Decrease of 50%");
+});
+
+test("equal percentage-change values display and copy No change, including zero", () => {
+  for (const [first, second] of [[80, 80], [-100, -100], [0, 0]]) {
+    const result = calculatePercentage("change", first, second);
+    assert.equal(result.direction, "unchanged");
+    assert.deepEqual(formatPercentageResult("change", result), {
+      displayText: "No change",
+      copyText: `Change from ${first} to ${second}: No change.`,
+    });
+  }
+  assert.throws(() => calculatePercentage("change", 0, 3), /starting value/);
+});
+
+test("percentage difference display and clipboard include context and percent unit", () => {
+  const result = calculatePercentage("difference", 80, 100);
+  const presentation = formatPercentageResult("difference", result);
+  assert.match(presentation.displayText, /%$/);
+  assert.equal(presentation.copyText, `${result.label}: ${presentation.displayText}.`);
+  assert.match(presentation.copyText, /Percentage difference between 80 and 100:/);
+  assert.match(presentation.copyText, /%\.$/);
 });
 
 test("BMI supports metric and imperial inputs and rejects unsafe values", () => {

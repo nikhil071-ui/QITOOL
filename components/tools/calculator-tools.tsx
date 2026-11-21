@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 import {
   addDaysToDate, calculateAge, calculateAgeDifference, calculateBirthdayInfo, calculateBMI,
   calculateDateDifference, calculateDiscount, calculateGSTBreakdown, calculateLoan, calculateLoanTenureComparison,
-  calculatePercentage, formatAmount, formatValue, loanScheduleToCSV, loanSummaryToCSV,
+  calculatePercentage, formatAmount, formatPercentageResult, formatValue, loanScheduleToCSV, loanSummaryToCSV,
   parseNumericInput, weekdayOfDate,
   type BmiUnits, type GstMode, type PercentageMode,
 } from "@/lib/calculations";
@@ -96,6 +96,7 @@ export function PercentageCalculator() {
   };
   const label = mode === "percent-of" ? "Percentage" : mode === "what-percent" ? "Part" : mode === "change" ? "Starting value" : "First value";
   const secondLabel = mode === "percent-of" ? "Value" : mode === "what-percent" ? "Whole" : mode === "change" ? "New value" : "Second value";
+  const presentation = calc.result ? formatPercentageResult(mode, calc.result) : null;
 
   return <>
     <form noValidate className="tool-form" onSubmit={onSubmit}>
@@ -107,10 +108,9 @@ export function PercentageCalculator() {
       <ToolActions onReset={reset} calculateLabel="Calculate percentage" />
       <ErrorNotice message={calc.error} />
     </form>
-    {calc.result && <ResultPanel copyText={`${calc.result.label}: ${formatValue(calc.result.value)}${mode === "what-percent" || mode === "change" ? "%" : ""}`}>
+    {calc.result && presentation && <ResultPanel copyText={presentation.copyText}>
       <p className="result-equation">{calc.result.label}</p>
-      <div className="result-highlight">{formatValue(calc.result.value)}{mode !== "percent-of" && <span>%</span>}</div>
-      {mode === "change" && <p className="result-supporting">{calc.result.value < 0 ? "Decrease" : "Increase"} of {formatValue(Math.abs(calc.result.value))}% relative to the starting value.</p>}
+      <div className="result-highlight">{presentation.displayText}</div>
     </ResultPanel>}
   </>;
 }

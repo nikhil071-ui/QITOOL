@@ -115,25 +115,32 @@ export function calculateBirthdayInfo(birthDate: string, asOfDate: string): Birt
 }
 
 export type PercentageMode = "percent-of" | "what-percent" | "change" | "difference";
-export type PercentageResult = { value: number; label: string };
+export type PercentageChangeDirection = "increase" | "decrease" | "unchanged";
+export type PercentageResult = { value: number; label: string; direction: PercentageChangeDirection | null };
 
 export function calculatePercentage(mode: PercentageMode, first: number, second: number): PercentageResult {
   requireFinite(first, "First value");
   requireFinite(second, "Second value");
-  if (mode === "percent-of") return { value: requireFiniteResult((first / 100) * second), label: `${first}% of ${second}` };
+  if (mode === "percent-of") return { value: requireFiniteResult((first / 100) * second), label: `${first}% of ${second}`, direction: null };
   if (mode === "what-percent") {
     if (second === 0) throw new Error("The comparison value cannot be zero.");
-    return { value: requireFiniteResult((first / second) * 100), label: `${first} as a percentage of ${second}` };
+    return { value: requireFiniteResult((first / second) * 100), label: `${first} as a percentage of ${second}`, direction: null };
   }
   if (mode === "change") {
+    const label = `Change from ${first} to ${second}`;
+    if (first === second) return { value: 0, label, direction: "unchanged" };
     if (first === 0) throw new Error("The starting value cannot be zero for percentage change.");
-    return { value: requireFiniteResult(((second - first) / first) * 100), label: `Change from ${first} to ${second}` };
+    return {
+      value: requireFiniteResult(((second - first) / first) * 100),
+      label,
+      direction: second > first ? "increase" : "decrease",
+    };
   }
   if (mode === "difference") {
     const averageMagnitude = (Math.abs(first) + Math.abs(second)) / 2;
     if (averageMagnitude === 0) throw new Error("At least one value must be non-zero to calculate percentage difference.");
     const value = (Math.abs(first - second) / averageMagnitude) * 100;
-    return { value: requireFiniteResult(value), label: `Percentage difference between ${first} and ${second}` };
+    return { value: requireFiniteResult(value), label: `Percentage difference between ${first} and ${second}`, direction: null };
   }
   throw new Error("Choose a percentage calculation type.");
 }
@@ -445,6 +452,22 @@ export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as
 export function validateImageFile(file: { type: string; size: number }, maxBytes = MAX_IMAGE_BYTES): void {
   if (!(ACCEPTED_IMAGE_TYPES as readonly string[]).includes(file.type)) throw new Error("Choose a JPEG, PNG, or WebP image.");
   requireRange(file.size, "File size in bytes", 1, maxBytes);
+}
+
+export function formatPercentageResult(mode: PercentageMode, result: PercentageResult): { displayText: string; copyText: string } {
+  let displayText: string;
+  if (mode === "change") {
+    if (result.direction === null) throw new Error("Percentage change result is missing its direction.");
+    if (result.direction === "unchanged") {
+      displayText = "No change";
+    } else {
+      const directionLabel = result.direction === "increase" ? "Increase" : "Decrease";
+      displayText = `${directionLabel} of ${formatValue(Math.abs(result.value))}%`;
+    }
+  } else {
+    displayText = `${formatValue(result.value)}${mode === "percent-of" ? "" : "%"}`;
+  }
+  return { displayText, copyText: `${result.label}: ${displayText}.` };
 }
 
 export function formatAmount(value: number): string {
