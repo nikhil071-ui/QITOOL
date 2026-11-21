@@ -1,6 +1,42 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
-import { compressImage } from "../lib/image-processing";
+import { MAX_IMAGE_PIXELS, compressImage, validateImageDimensions } from "../lib/image-processing";
+
+test("image compressor enforces the inclusive 40-megapixel input resolution limit", () => {
+  assert.equal(MAX_IMAGE_PIXELS, 40_000_000);
+  assert.doesNotThrow(() => validateImageDimensions(8000, 5000));
+  assert.throws(() => validateImageDimensions(8000, 5001), /exceeds the 40-megapixel limit.*40 megapixels or fewer/);
+  assert.throws(() => validateImageDimensions(0, 5000), /invalid dimensions/);
+});
+
+test("image compressor discloses both input limits beside the upload control", () => {
+  const source = readFileSync("components/tools/image-compressor.tsx", "utf8");
+  const uploadPosition = source.indexOf('<input id="image-file"');
+  const limitsPosition = source.indexOf("Maximum input file size: 20 MB; maximum input resolution: 40 megapixels.", uploadPosition);
+  assert.ok(uploadPosition >= 0 && limitsPosition > uploadPosition && limitsPosition - uploadPosition < 300,
+    "both limits should be disclosed next to the file picker");
+});
+
+test("compression rejects a decoded image above 40 megapixels before canvas processing", async () => {
+  const oldCreateImageBitmap = Object.getOwnPropertyDescriptor(globalThis, "createImageBitmap");
+  let closeCount = 0;
+  Object.defineProperty(globalThis, "createImageBitmap", {
+    configurable: true,
+    value: async () => ({ width: 8000, height: 5001, close: () => { closeCount += 1; } }),
+  });
+
+  try {
+    await assert.rejects(
+      compressImage({ type: "image/png", size: 1024 } as File, { format: "image/png", quality: 0.8, maxDimension: 2000 }),
+      /exceeds the 40-megapixel limit.*40 megapixels or fewer/,
+    );
+    assert.equal(closeCount, 1);
+  } finally {
+    if (oldCreateImageBitmap) Object.defineProperty(globalThis, "createImageBitmap", oldCreateImageBitmap);
+    else Reflect.deleteProperty(globalThis, "createImageBitmap");
+  }
+});
 
 test("image compressor resizes and encodes locally, and reports unsupported browser formats", async () => {
   const oldDocument = Object.getOwnPropertyDescriptor(globalThis, "document");

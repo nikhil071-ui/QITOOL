@@ -142,6 +142,12 @@ test("BMI content states its 20+ age scope and places CDC guidance beside classi
   assert.match(bmiComponent.slice(cdcLinkPosition), /CDC adult BMI categories and guidance for ages 20\+/u);
 });
 
+test("Image Compressor content describes both image input limits", () => {
+  const article = toolArticles["image-compressor"];
+  assert.match(article.instructions[0], /20 MB and 40 megapixels/u);
+  assert.match(article.whatItDoes, /up to 20 MB and 40 megapixels/u);
+});
+
 test("typing test example uses the first available passage and matches full-timer scoring", () => {
   const article = toolArticles["typing-speed-test"];
   const passage = typingPassages[0];

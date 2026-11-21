@@ -231,8 +231,8 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "Image Compressor for JPEG, PNG and WebP",
     seoDescription: "Resize a local image, choose JPEG, PNG or WebP output, and compare the file size before downloading. Adjust quality or dimensions to fit an upload limit.",
     introduction: "Choose an image from your device, pick the longest edge you need and compare the new file with the original. The preview and byte counts help you decide whether to lower the quality or resize again.",
-    whatItDoes: "The compressor decodes an image into a browser canvas, limits oversized dimensions, and exports with the requested supported MIME type. JPEG and WebP use the quality control; PNG is lossless and may not become smaller for every image.",
-    instructions: ["Choose a JPEG, PNG, or WebP image up to 20 MB.", "Select an output type and quality for JPEG/WebP. PNG preserves transparency but does not use a lossy quality setting.", "Select Compress image, compare the preview and file sizes, then download if the result suits your needs."],
+    whatItDoes: "The compressor accepts local JPEG, PNG, and WebP images up to 20 MB and 40 megapixels, resizes them in a browser canvas, and exports with the requested supported MIME type. JPEG and WebP use the quality control; PNG is lossless and may not become smaller for every image.",
+    instructions: ["Choose a JPEG, PNG, or WebP image no larger than 20 MB and 40 megapixels.", "Select an output type and quality for JPEG/WebP. PNG preserves transparency but does not use a lossy quality setting.", "Select Compress image, compare the preview and file sizes, then download if the result suits your needs."],
     example: { title: "A large photo for a web page", details: "A 4,000 × 3,000 photo exported with a 2,000-pixel longest edge becomes 2,000 × 1,500. Check the encoded file size and small details before replacing the original." },
     resultExplanation: "Compression can reduce detail, especially at low JPEG/WebP quality. PNG is lossless. Browser support for WebP output varies; if an encoder is unavailable, choose JPEG or PNG.",
     faqs: [

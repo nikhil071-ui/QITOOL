@@ -23,6 +23,9 @@ test("image compressor accepts supported formats and rejects unsafe files", () =
   }
   assert.doesNotThrow(() => validateImageFile({ type: "image/jpeg", size: MAX_IMAGE_BYTES }));
   assert.throws(() => validateImageFile({ type: "image/gif", size: 1024 }), /JPEG, PNG, or WebP/);
-  assert.throws(() => validateImageFile({ type: "image/png", size: MAX_IMAGE_BYTES + 1 }), /File size/);
-  assert.throws(() => validateImageFile({ type: "image/jpeg", size: 0 }), /File size/);
+  assert.throws(
+    () => validateImageFile({ type: "image/png", size: MAX_IMAGE_BYTES + 1 }),
+    /exceeds the 20 MB limit.*20 MB file-size limit and the 40-megapixel resolution limit/,
+  );
+  assert.throws(() => validateImageFile({ type: "image/jpeg", size: 0 }), /larger than 0 bytes/);
 });

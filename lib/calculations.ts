@@ -452,7 +452,12 @@ export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as
 
 export function validateImageFile(file: { type: string; size: number }, maxBytes = MAX_IMAGE_BYTES): void {
   if (!(ACCEPTED_IMAGE_TYPES as readonly string[]).includes(file.type)) throw new Error("Choose a JPEG, PNG, or WebP image.");
-  requireRange(file.size, "File size in bytes", 1, maxBytes);
+  if (!Number.isFinite(file.size) || file.size <= 0) throw new Error("Image file must be larger than 0 bytes.");
+  if (file.size > maxBytes) {
+    const megabytes = maxBytes / (1024 * 1024);
+    const sizeLimit = `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`;
+    throw new Error(`Image file size exceeds the ${sizeLimit} limit. Choose a supported image within the ${sizeLimit} file-size limit and the 40-megapixel resolution limit.`);
+  }
 }
 
 export function formatPercentageResult(mode: PercentageMode, result: PercentageResult): { displayText: string; copyText: string } {

@@ -110,7 +110,7 @@ export function ImageCompressor() {
       <div className="tool-field">
         <label htmlFor="image-file">Choose an image</label>
         <input id="image-file" className="tool-file-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={onFileChange} disabled={busy} />
-        <p className="tool-field-hint">JPEG, PNG, or WebP; up to 20 MB. The file stays on this device.</p>
+        <p className="tool-field-hint">JPEG, PNG, or WebP. Maximum input file size: 20 MB; maximum input resolution: 40 megapixels. The file stays on this device.</p>
       </div>
       {file && <p className="selected-file"><ImageIcon size={15} aria-hidden="true" /><strong>{file.name}</strong><span>{formatBytes(file.size)}</span></p>}
       <div className="tool-form-grid">

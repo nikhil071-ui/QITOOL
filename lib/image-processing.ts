@@ -11,7 +11,16 @@ export type ImageCompressionResult = {
   outputType: ImageOutputFormat;
 };
 
-const MAX_PIXELS = 40_000_000;
+export const MAX_IMAGE_PIXELS = 40_000_000;
+
+export function validateImageDimensions(width: number, height: number): void {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+    throw new Error("The image has invalid dimensions.");
+  }
+  if (width * height > MAX_IMAGE_PIXELS) {
+    throw new Error("Image resolution exceeds the 40-megapixel limit. Choose an image with 40 megapixels or fewer.");
+  }
+}
 
 type DecodedImage = {
   source: CanvasImageSource;
@@ -75,8 +84,7 @@ export async function compressImage(file: File, options: ImageCompressionOptions
   }
 
   try {
-    if (decoded.width < 1 || decoded.height < 1) throw new Error("The image has invalid dimensions.");
-    if (decoded.width * decoded.height > MAX_PIXELS) throw new Error("This image has too many pixels to process safely. Choose an image under 40 megapixels.");
+    validateImageDimensions(decoded.width, decoded.height);
 
     const scale = Math.min(1, options.maxDimension / Math.max(decoded.width, decoded.height));
     const width = Math.max(1, Math.round(decoded.width * scale));
