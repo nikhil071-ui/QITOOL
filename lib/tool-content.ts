@@ -1,4 +1,5 @@
 import type { ToolInfo } from "./tools";
+import { typingPassages } from "./typing-test";
 
 export type ToolArticle = {
   seoTitle: string;
@@ -246,8 +247,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoDescription: "Type a practice passage for up to 60 seconds. See correct WPM, raw WPM and character accuracy, then restart with a fresh passage.",
     introduction: "Start the timer and type the displayed passage, including spaces and punctuation. When time runs out or you reach the passage length, compare your correct words per minute with your raw speed.",
     whatItDoes: "Correct words per minute uses the common five-character word convention. Accuracy is the fraction of typed characters that match the passage at the same position; the raw speed is also shown so errors are not hidden.",
-    instructions: ["Select Start test to begin the 60-second timer.", "Focus the typing field and type the passage, including its punctuation and spaces.", "When the passage or timer ends, review speed and accuracy. Select Start again for a fresh passage or Reset to clear the current attempt."],
-    example: { title: "Read a practice score", details: "If 120 of 125 typed characters match during a 30-second run, raw speed is 50 WPM, correct speed is 48 WPM, and accuracy is 96%." },
+    instructions: ["Select Start test; the first start uses the initially displayed passage, and each later start cycles to a fresh passage.", "Focus the typing field and type the passage, including its punctuation and spaces.", "When the passage or 60-second timer ends, review speed and accuracy. Select Start again for a fresh passage or Reset to clear the current attempt."],
+    example: {
+      title: "Score a timed excerpt of the first passage",
+      details: `On initial page load, the first test uses this passage: “${typingPassages[0]}” If you type its first 125 characters by the end of the full 60-second timer and 120 match at the same positions, raw WPM is 25 (125 ÷ 5 ÷ 1 minute), correct WPM is 24 (120 ÷ 5 ÷ 1 minute), and accuracy is 96% (120 ÷ 125).`,
+    },
     resultExplanation: "Scores are practice estimates, not a standardized certification. Keyboard layout, language, passage difficulty, and test duration affect comparisons.",
     faqs: [
       { question: "How is WPM calculated?", answer: "Correct characters are divided by five and then divided by elapsed minutes. Raw WPM uses all typed characters in the same way." },

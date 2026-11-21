@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { countCharacters, countParagraphs, countText, calculateTypingMetrics } from "@/lib/calculations";
+import { typingPassageIndexForStart, typingPassages } from "@/lib/typing-test";
 import { CopyButton, ResultStat } from "@/components/tools/form-elements";
 
 function TextToolReset({ onReset }: { onReset: () => void }) {
@@ -43,11 +44,6 @@ export function CharacterCounter() {
   </div>;
 }
 
-const typingPassages = [
-  "A clear plan turns a difficult task into a series of small steps. Take your time, watch the punctuation, and aim for steady accuracy before increasing your speed.",
-  "Good tools should make useful work feel simpler. They explain what they do, show results clearly, and leave people in control of the choices that come next.",
-  "Practice builds confidence through repetition. A comfortable rhythm, relaxed hands, and careful attention often matter more than rushing through every line.",
-];
 const TEST_SECONDS = 60;
 
 export function TypingSpeedTest() {
@@ -59,6 +55,7 @@ export function TypingSpeedTest() {
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number | null>(null);
   const typedRef = useRef("");
+  const hasStartedRef = useRef(false);
   const passage = typingPassages[passageIndex];
 
   useEffect(() => {
@@ -76,13 +73,15 @@ export function TypingSpeedTest() {
   }, [running]);
 
   const start = () => {
-    setPassageIndex((current) => (current + 1) % typingPassages.length);
+    const hasPreviousStart = hasStartedRef.current;
+    setPassageIndex((current) => typingPassageIndexForStart(current, hasPreviousStart));
     setTyped("");
     typedRef.current = "";
     setRemaining(TEST_SECONDS);
     setElapsed(0);
     setFinished(false);
     startRef.current = performance.now();
+    hasStartedRef.current = true;
     setRunning(true);
   };
 

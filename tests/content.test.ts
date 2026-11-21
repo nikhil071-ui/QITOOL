@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { tools } from "../lib/tools";
 import { getToolArticle, toolArticles } from "../lib/tool-content";
+import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
-import { calculateGSTBreakdown, calculateLoanTenureComparison, formatAmount } from "../lib/calculations";
+import { calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, formatAmount } from "../lib/calculations";
 
 test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
   const { example, whatItDoes } = toolArticles["gst-calculator"];
@@ -110,4 +112,33 @@ test("Phase 11 tool content accurately describes the new date, age, GST, EMI and
   assert.match(unitConverter.seoDescription, /imperial gallons/u);
   assert.match(unitConverter.example.details, /4\.54609 litres/u);
   assert.match(unitConverter.faqs.find(faq => /gallon/u.test(faq.question))?.answer ?? "", /3\.785411784 litres.*4\.54609 litres/u);
+});
+
+test("typing test example uses the first available passage and matches full-timer scoring", () => {
+  const article = toolArticles["typing-speed-test"];
+  const passage = typingPassages[0];
+  assert.ok(article.example.details.includes(passage));
+  assert.match(article.instructions[0], /first start uses the initially displayed passage/u);
+  assert.equal(typingPassageIndexForStart(0, false), 0);
+  assert.equal(typingPassageIndexForStart(0, true), 1);
+  assert.equal(typingPassageIndexForStart(typingPassages.length - 1, true), 0);
+
+  const target = Array.from(passage).slice(0, 125);
+  assert.equal(target.length, 125);
+  assert.ok(Array.from(passage).length > target.length, "the sample excerpt does not complete the passage before the timer");
+  const wrongPositions = new Set([10, 30, 50, 70, 90]);
+  const typed = target.map((character, index) => wrongPositions.has(index) ? (character === "x" ? "y" : "x") : character).join("");
+  const metrics = calculateTypingMetrics(passage, typed, 60);
+  assert.deepEqual(metrics, { correctWpm: 24, rawWpm: 25, accuracyPercent: 96, correctCharacters: 120, typedCharacters: 125 });
+
+  assert.match(article.example.details, /first 125 characters.*full 60-second timer/u);
+  assert.match(article.example.details, /raw WPM is 25.*correct WPM is 24.*accuracy is 96%/u);
+  assert.doesNotMatch(article.example.details, /30-second/u);
+
+  const source = readFileSync("components/tools/text-tools.tsx", "utf8");
+  const typingComponent = source.split("export function TypingSpeedTest() {")[1]?.split("\n}")[0] ?? "";
+  assert.match(typingComponent, /const passage = typingPassages\[passageIndex\]/u);
+  assert.match(typingComponent, /const hasPreviousStart = hasStartedRef\.current;\s*setPassageIndex\(\(current\) => typingPassageIndexForStart\(current, hasPreviousStart\)\);/u);
+  assert.match(typingComponent, /hasStartedRef\.current = true;/u);
+  assert.match(source, /const TEST_SECONDS = 60;/u);
 });
