@@ -251,6 +251,27 @@ test("Word Counter example output matches its sample text and displayed counters
   }
 });
 
+test("Character Counter displays and copies the same grapheme count result", () => {
+  assert.match(toolArticles["character-counter"].whatItDoes, /visible grapheme clusters.*Intl\.Segmenter.*fallback for common Unicode sequences/u);
+
+  const source = readFileSync("components/tools/text-tools.tsx", "utf8");
+  const component = source.split("export function CharacterCounter() {")[1]?.split("\n}\n\nconst TEST_SECONDS")[0] ?? "";
+  const copyText = component.match(/const copyText = `([^`]+)`;/u)?.[1] ?? "";
+
+  assert.match(component, /const result = countCharacters\(text\)/u);
+  for (const field of ["characters", "charactersWithoutWhitespace", "whitespace", "words", "lines"]) {
+    assert.ok(copyText.includes(`result.${field}`), `copy summary should use result.${field}`);
+  }
+  for (const display of [
+    'label="Characters" value={String(result.characters)}',
+    'label="Without whitespace" value={String(result.charactersWithoutWhitespace)}',
+    'label="Whitespace" value={String(result.whitespace)}',
+    'label="Words / lines" value={`${result.words} / ${result.lines}`}',
+  ]) {
+    assert.ok(component.includes(display), `live display should use ${display}`);
+  }
+});
+
 test("BMI content states its 20+ age scope and places CDC guidance beside classification", () => {
   const article = toolArticles["bmi-calculator"];
   assert.match(article.seoDescription, /adults aged 20 and older/u);

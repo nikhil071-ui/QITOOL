@@ -364,11 +364,131 @@ export function formatDiscountResult(result: DiscountResult): DiscountPresentati
   };
 }
 
+const graphemeMarkPattern = /\p{Mark}/u;
+const emojiModifierPattern = /\p{Emoji_Modifier}/u;
+const extendedPictographicPattern = /\p{Extended_Pictographic}/u;
+const regionalIndicatorPattern = /\p{Regional_Indicator}/u;
+const graphemeControlPattern = /[\p{Cc}\p{Zl}\p{Zp}]/u;
+
+type HangulGraphemeClass = "L" | "V" | "T" | "LV" | "LVT";
+
+function graphemeCodePoint(character: string): number {
+  return character.codePointAt(0) ?? 0;
+}
+
+function isGraphemeExtend(character: string): boolean {
+  const codePoint = graphemeCodePoint(character);
+  return graphemeMarkPattern.test(character) || emojiModifierPattern.test(character) || codePoint === 0x200c ||
+    (codePoint >= 0xe0020 && codePoint <= 0xe007f);
+}
+
+function isGraphemeControl(character: string): boolean {
+  return graphemeControlPattern.test(character);
+}
+
+function isGraphemePrepend(character: string): boolean {
+  const codePoint = graphemeCodePoint(character);
+  return (codePoint >= 0x0600 && codePoint <= 0x0605) || codePoint === 0x06dd || codePoint === 0x070f ||
+    (codePoint >= 0x0890 && codePoint <= 0x0891) || codePoint === 0x08e2 || codePoint === 0x0d4e ||
+    codePoint === 0x110bd || codePoint === 0x110cd || (codePoint >= 0x111c2 && codePoint <= 0x111c3) ||
+    codePoint === 0x1193f || codePoint === 0x11941 || codePoint === 0x11a3a ||
+    (codePoint >= 0x11a84 && codePoint <= 0x11a89) || codePoint === 0x11d46 || codePoint === 0x11f02;
+}
+
+function indicConsonantScript(character: string): string | undefined {
+  const codePoint = graphemeCodePoint(character);
+  if ((codePoint >= 0x0915 && codePoint <= 0x0939) || (codePoint >= 0x0958 && codePoint <= 0x095f)) return "devanagari";
+  if (codePoint >= 0x0995 && codePoint <= 0x09b9) return "bengali";
+  if ((codePoint >= 0x0a15 && codePoint <= 0x0a39) || (codePoint >= 0x0a59 && codePoint <= 0x0a5e)) return "gurmukhi";
+  if ((codePoint >= 0x0a95 && codePoint <= 0x0ab9) || codePoint === 0x0af9) return "gujarati";
+  if ((codePoint >= 0x0b15 && codePoint <= 0x0b39) || (codePoint >= 0x0b5c && codePoint <= 0x0b5d) || codePoint === 0x0b5f) return "odia";
+  if (codePoint >= 0x0b95 && codePoint <= 0x0bb9) return "tamil";
+  if (codePoint >= 0x0c15 && codePoint <= 0x0c39) return "telugu";
+  if (codePoint >= 0x0c95 && codePoint <= 0x0cb9) return "kannada";
+  if (codePoint >= 0x0d15 && codePoint <= 0x0d3a) return "malayalam";
+  if (codePoint >= 0x0d9a && codePoint <= 0x0dc6) return "sinhala";
+  return undefined;
+}
+
+function isIndicLinker(character: string): boolean {
+  const codePoint = graphemeCodePoint(character);
+  return codePoint === 0x094d || codePoint === 0x09cd || codePoint === 0x0a4d || codePoint === 0x0acd || codePoint === 0x0b4d ||
+    codePoint === 0x0bcd || codePoint === 0x0c4d || codePoint === 0x0ccd || codePoint === 0x0d4d || codePoint === 0x0dca;
+}
+
+function joinsIndicConjunct(characters: string[], currentIndex: number): boolean {
+  const currentScript = indicConsonantScript(characters[currentIndex]);
+  if (!currentScript) return false;
+
+  let precedingIndex = currentIndex - 1;
+  let hasLinker = false;
+  while (precedingIndex >= 0 && (isGraphemeExtend(characters[precedingIndex]) || characters[precedingIndex] === "\u200c" || characters[precedingIndex] === "\u200d")) {
+    if (isIndicLinker(characters[precedingIndex])) hasLinker = true;
+    precedingIndex -= 1;
+  }
+  return hasLinker && precedingIndex >= 0 && indicConsonantScript(characters[precedingIndex]) === currentScript;
+}
+
+function hangulGraphemeClass(character: string): HangulGraphemeClass | undefined {
+  const codePoint = graphemeCodePoint(character);
+  if ((codePoint >= 0x1100 && codePoint <= 0x115f) || (codePoint >= 0xa960 && codePoint <= 0xa97c)) return "L";
+  if ((codePoint >= 0x1160 && codePoint <= 0x11a7) || (codePoint >= 0xd7b0 && codePoint <= 0xd7c6)) return "V";
+  if ((codePoint >= 0x11a8 && codePoint <= 0x11ff) || (codePoint >= 0xd7cb && codePoint <= 0xd7fb)) return "T";
+  if (codePoint >= 0xac00 && codePoint <= 0xd7a3) return (codePoint - 0xac00) % 28 === 0 ? "LV" : "LVT";
+  return undefined;
+}
+
+function joinsHangulGrapheme(previous: string, current: string): boolean {
+  const previousClass = hangulGraphemeClass(previous);
+  const currentClass = hangulGraphemeClass(current);
+  if (!previousClass || !currentClass) return false;
+  return previousClass === "L" ||
+    ((previousClass === "LV" || previousClass === "V") && (currentClass === "V" || currentClass === "T")) ||
+    ((previousClass === "LVT" || previousClass === "T") && currentClass === "T");
+}
+
+function isEmojiZwjSequence(characters: string[], currentIndex: number): boolean {
+  let precedingIndex = currentIndex - 2;
+  while (precedingIndex >= 0 && isGraphemeExtend(characters[precedingIndex])) precedingIndex -= 1;
+  return precedingIndex >= 0 && extendedPictographicPattern.test(characters[precedingIndex]);
+}
+
+// Preserve common extended-grapheme rules when Intl.Segmenter is unavailable.
+function countGraphemesFallback(text: string): number {
+  const characters = Array.from(text);
+  if (characters.length === 0) return 0;
+
+  let count = 1;
+  let regionalIndicatorRun = regionalIndicatorPattern.test(characters[0]) ? 1 : 0;
+  for (let index = 1; index < characters.length; index += 1) {
+    const previous = characters[index - 1];
+    const current = characters[index];
+    const previousIsRegionalIndicator = regionalIndicatorPattern.test(previous);
+    const currentIsRegionalIndicator = regionalIndicatorPattern.test(current);
+    let joinsPrevious = false;
+
+    if (previous === "\r" && current === "\n") {
+      joinsPrevious = true;
+    } else if (!isGraphemeControl(previous) && !isGraphemeControl(current)) {
+      joinsPrevious = joinsHangulGrapheme(previous, current) || isGraphemeExtend(current) || current === "\u200d" ||
+        isGraphemePrepend(previous) || joinsIndicConjunct(characters, index) ||
+        (previous === "\u200d" && extendedPictographicPattern.test(current) && isEmojiZwjSequence(characters, index)) ||
+        (previousIsRegionalIndicator && currentIsRegionalIndicator && regionalIndicatorRun % 2 === 1);
+    }
+
+    if (!joinsPrevious) count += 1;
+    regionalIndicatorRun = currentIsRegionalIndicator
+      ? previousIsRegionalIndicator && joinsPrevious ? regionalIndicatorRun + 1 : 1
+      : 0;
+  }
+  return count;
+}
+
 function countGraphemes(text: string): number {
   if (typeof Intl.Segmenter === "function") {
     return Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text)).length;
   }
-  return Array.from(text).length;
+  return countGraphemesFallback(text);
 }
 
 function countWords(text: string): number {

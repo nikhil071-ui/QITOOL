@@ -240,6 +240,47 @@ test("word and character counters handle whitespace, punctuation, and emoji grap
   assert.equal(countCharacters("").lines, 0);
 });
 
+test("character counter grapheme fallback matches Intl.Segmenter for Unicode cases", () => {
+  const cases = [
+    { name: "ASCII", text: "ABC", characters: 3, withoutWhitespace: 3 },
+    { name: "precomposed accent", text: "café", characters: 4, withoutWhitespace: 4 },
+    { name: "combining accent", text: "cafe\u0301", characters: 4, withoutWhitespace: 4 },
+    { name: "supplementary emoji", text: "A😀B", characters: 3, withoutWhitespace: 3 },
+    { name: "family ZWJ sequence", text: "👩‍👩‍👧‍👦", characters: 1, withoutWhitespace: 1 },
+    { name: "regional-indicator flag", text: "🇮🇳", characters: 1, withoutWhitespace: 1 },
+    { name: "emoji modifier", text: "👍🏽", characters: 1, withoutWhitespace: 1 },
+    { name: "emoji ZWJ sequence with modifier", text: "👩🏽‍💻", characters: 1, withoutWhitespace: 1 },
+    { name: "keycap sequence", text: "1️⃣", characters: 1, withoutWhitespace: 1 },
+    { name: "Devanagari conjunct", text: "क्ष", characters: 1, withoutWhitespace: 1 },
+    { name: "Devanagari conjunct with ZWJ", text: "क्‍ष", characters: 1, withoutWhitespace: 1 },
+    { name: "Hangul jamo sequence", text: "가", characters: 1, withoutWhitespace: 1 },
+    { name: "non-emoji ZWJ", text: "a‍b", characters: 2, withoutWhitespace: 2 },
+    { name: "CRLF line break", text: "A\r\nB", characters: 3, withoutWhitespace: 2 },
+    { name: "emoji with a space", text: "Hi 👋", characters: 4, withoutWhitespace: 3 },
+  ];
+  const segmenter = typeof Intl.Segmenter === "function" ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : undefined;
+
+  for (const { name, text, characters, withoutWhitespace } of cases) {
+    const result = countCharacters(text);
+    assert.equal(result.characters, characters, `${name}: displayed count`);
+    assert.equal(result.charactersWithoutWhitespace, withoutWhitespace, `${name}: count without whitespace`);
+    if (segmenter) assert.equal(result.characters, Array.from(segmenter.segment(text)).length, `${name}: primary segmentation`);
+  }
+
+  const segmenterDescriptor = Object.getOwnPropertyDescriptor(Intl, "Segmenter");
+  assert.ok(segmenterDescriptor?.configurable, "the test runtime must allow exercising the fallback branch");
+  try {
+    Object.defineProperty(Intl, "Segmenter", { ...segmenterDescriptor, value: undefined });
+    for (const { name, text, characters, withoutWhitespace } of cases) {
+      const result = countCharacters(text);
+      assert.equal(result.characters, characters, `${name}: fallback display count`);
+      assert.equal(result.charactersWithoutWhitespace, withoutWhitespace, `${name}: fallback count without whitespace`);
+    }
+  } finally {
+    Object.defineProperty(Intl, "Segmenter", segmenterDescriptor);
+  }
+});
+
 test("word counter splits paragraphs only at blank lines and handles punctuation and empty text", () => {
   const text = ["First line.", "Still same paragraph!", "", "Second paragraph?"].join("\n");
   assert.deepEqual(countText(text), { words: 7, characters: 52, charactersWithoutWhitespace: 45, sentences: 3, readingMinutes: 1 });

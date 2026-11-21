@@ -174,7 +174,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "Character Counter With and Without Spaces",
     seoDescription: "Check visible characters, whitespace, words and lines in text. Compare the count with spaces to the count excluding spaces, tabs and line breaks.",
     introduction: "Paste a caption, form entry or message to count its visible characters. Compare the full length with the total after spaces, tabs and line breaks are removed.",
-    whatItDoes: "The counter uses Unicode grapheme segmentation when supported. It reports characters with all text, characters excluding whitespace, whitespace characters, words, and lines (including an empty final line after a line break).",
+    whatItDoes: "Characters are counted as visible grapheme clusters, using Intl.Segmenter when available and a fallback for common Unicode sequences otherwise. It reports characters with all text, characters excluding whitespace, whitespace characters, words, and lines (including an empty final line after a line break).",
     instructions: ["Type or paste text into the editor.", "Review the live character and line counts.", "Copy the summary or choose Clear text to empty the field."],
     example: { title: "Text with an emoji", details: "In a browser with grapheme segmentation, “Hi 👋” counts as four visible characters, or three without the space. A joined family emoji can also occupy just one visible position." },
     resultExplanation: "“Without whitespace” removes spaces, tabs, and line breaks. Some platforms count characters differently, so compare the same counting convention used by your destination.",
