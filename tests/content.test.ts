@@ -7,6 +7,14 @@ import { typingPassageIndexForStart, typingPassages } from "../lib/typing-test";
 import { categoryGuides } from "../lib/category-guides";
 import { addDaysToDate, calculateAge, calculateBirthdayInfo, calculateDateDifference, calculateGSTBreakdown, calculateLoanTenureComparison, calculateTypingMetrics, countParagraphs, countText, formatAmount, weekdayOfDate } from "../lib/calculations";
 
+test("Terms page clearly links to the existing disclaimer route", () => {
+  const termsPage = readFileSync("app/terms/page.tsx", "utf8");
+  const disclaimerPage = readFileSync("app/disclaimer/page.tsx", "utf8");
+
+  assert.match(termsPage, /<Link href="\/disclaimer">full disclaimer<\/Link>/u);
+  assert.match(disclaimerPage, /PageIntro title="Disclaimer"/u);
+});
+
 test("the reverse GST example matches Remove GST for an inclusive invoice", () => {
   const { example, whatItDoes } = toolArticles["gst-calculator"];
   assert.match(example.jumpLabel ?? "", /Remove GST.*reverse GST calculation/i);
