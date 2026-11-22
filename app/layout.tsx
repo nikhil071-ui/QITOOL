@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
+  other: {
+    "google-adsense-account": "ca-pub-4649521973867824",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any", type: "image/x-icon" },
