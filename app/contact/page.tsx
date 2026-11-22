@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageIntro } from "@/components/page-intro";
 import { Mail, MessageCircle } from "lucide-react";
-import { pageMetadata } from "@/lib/site";
+import { contactEmail, pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata("Contact Us", "Contact QITOOL by email about calculator errors, content corrections, accessibility issues, privacy concerns, or general feedback.", "/contact");
 
@@ -15,8 +15,8 @@ export default function ContactPage() {
           <div>
             <p className="eyebrow">CONTACT QITOOL</p>
             <h2>Email the QITOOL team</h2>
-            <p>Email us about calculator errors, content corrections, accessibility issues, privacy concerns, or general feedback. For calculator errors, include the tool name, a non-sensitive example, and the result you expected. Do not include passwords, account numbers, or other sensitive information.</p>
-            <div className="contact-detail"><Mail size={16} aria-hidden="true" /><a className="inline-link" href="mailto:contact@qitool.tech">contact@qitool.tech</a></div>
+            <p>For a correction, include the page or tool name, a non-sensitive example, the result you saw and the result you expected. Leave out passwords, account numbers and other sensitive information.</p>
+            <div className="contact-detail"><Mail size={16} aria-hidden="true" /><a className="inline-link" href={`mailto:${contactEmail}`}>{contactEmail}</a></div>
           </div>
         </section>
         <p className="contact-privacy-note">If you email us, we handle the information you send to respond to your enquiry. See the <Link href="/privacy-policy">privacy policy</Link> for details.</p>

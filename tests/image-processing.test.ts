@@ -16,6 +16,18 @@ test("image compressor discloses both input limits beside the upload control", (
   const limitsPosition = source.indexOf("Maximum input file size: 20 MB; maximum input resolution: 40 megapixels.", uploadPosition);
   assert.ok(uploadPosition >= 0 && limitsPosition > uploadPosition && limitsPosition - uploadPosition < 300,
     "both limits should be disclosed next to the file picker");
+  assert.match(source, /<input id="image-file"[^>]*aria-describedby="image-file-hint"/u);
+  assert.match(source, /<p id="image-file-hint"[^>]*>JPEG, PNG, or WebP/u);
+});
+
+test("image compressor locks submitted settings and binds the download to the encoded output", () => {
+  const source = readFileSync("components/tools/image-compressor.tsx", "utf8");
+  assert.match(source, /<SelectField id="image-format"[^>]*disabled=\{busy\}/u);
+  assert.match(source, /<SelectField id="image-dimensions"[^>]*disabled=\{busy\}/u);
+  assert.match(source, /disabled=\{busy \|\| format === "image\/png"\}/u);
+  assert.match(source, /if \(mounted\.current\) \{\s*setOutput\(\{ \.\.\.compressed, url:/u);
+  assert.match(source, /output\.outputType\.split\("\/"\)\[1\]/u);
+  assert.match(source, /output\.width\}[^\n]*output\.height/u);
 });
 
 test("compression rejects a decoded image above 40 megapixels before canvas processing", async () => {
@@ -73,6 +85,7 @@ test("image compressor resizes and encodes locally, and reports unsupported brow
     const result = await compressImage(file, { format: "image/jpeg", quality: 0.75, maxDimension: 2000 });
     assert.deepEqual([result.width, result.height], [2000, 1000]);
     assert.equal(result.blob.type, "image/jpeg");
+    assert.equal(result.outputType, result.blob.type);
     assert.equal(result.outputBytes, 10);
     assert.equal(result.originalBytes, 4096);
     assert.equal(requestedType, "image/jpeg");

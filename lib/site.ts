@@ -35,9 +35,9 @@ const configuredContactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() ?? 
 if (configuredContactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(configuredContactEmail)) {
   throw new Error("NEXT_PUBLIC_CONTACT_EMAIL must be a valid public email address.");
 }
-export const contactEmail = configuredContactEmail || null;
+export const contactEmail = configuredContactEmail || "contact@qitool.tech";
 
-export const publisherName = process.env.NEXT_PUBLIC_PUBLISHER_NAME?.trim() || null;
+export const publisherName = process.env.NEXT_PUBLIC_PUBLISHER_NAME?.trim() || "Nikhil Chaudhary";
 
 const socialImage = "/opengraph-image.png";
 

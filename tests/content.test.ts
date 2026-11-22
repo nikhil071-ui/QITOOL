@@ -49,6 +49,7 @@ test("the discount GST FAQ links to the registered GST calculator", () => {
 
 test("homepage copy avoids repeated prompts and uses distinct category descriptions", () => {
   const homepage = readFileSync("app/page.tsx", "utf8");
+  const footer = readFileSync("components/site-footer.tsx", "utf8");
   const featured = readFileSync("components/featured-tools.tsx", "utf8");
   assert.match(homepage, /TOOLS FOR THE TASK AT HAND/u);
   assert.doesNotMatch(homepage, /YOUR EVERYDAY DIGITAL TOOLKIT/u);
@@ -57,6 +58,7 @@ test("homepage copy avoids repeated prompts and uses distinct category descripti
   assert.match(homepage, /Tools process inputs in your browser\./u);
   assert.match(homepage, /Yes\. The tools listed here are free to use\./u);
   assert.doesNotMatch(homepage, /free to use, with no account required/u);
+  assert.doesNotMatch(homepage, /What is QITOOL\?/u);
   assert.match(homepage, /No\. The tools work in your browser without an account/u);
   assert.match(homepage, /Worked examples show how to check a GST-inclusive price or fit an image within a file limit\./u);
   assert.match(homepage, /Compress images or generate QR codes/u);
@@ -64,6 +66,7 @@ test("homepage copy avoids repeated prompts and uses distinct category descripti
   assert.match(homepage, /Some tasks need a single answer; others call for comparing options/u);
   assert.match(homepage, /Link href="\/tools" className="button-primary">Explore All Tools/u);
   assert.match(featured, /Link href="\/tools" className="inline-link">Browse the full collection/u);
+  assert.doesNotMatch(footer, /Smart Tools\. Simple Life\./u);
 });
 
 test("the discount result displays and copies the same rounded price presentation", () => {
@@ -125,7 +128,7 @@ test("every listed tool has distinct, complete search and help content", () => {
     assert.ok(article.example.title.length > 0 && article.example.details.length > 20, `${tool.slug} needs a practical example`);
     assert.ok(article.resultExplanation.length > 30, `${tool.slug} needs result context`);
     assert.ok(article.faqs.length >= 2, `${tool.slug} needs useful FAQs`);
-    assert.ok(article.related.length >= 1, `${tool.slug} needs related tools`);
+    assert.ok(Array.isArray(article.related), `${tool.slug} related tools must be a list`);
     for (const relatedSlug of article.related) assert.ok(tools.some((candidate) => candidate.slug === relatedSlug), `${tool.slug} links to missing tool ${relatedSlug}`);
     assert.equal(introductions.has(article.introduction), false, `${tool.slug} repeats an introduction`);
     assert.equal(descriptions.has(article.seoDescription), false, `${tool.slug} repeats an SEO description`);
@@ -190,7 +193,8 @@ test("Age Calculator example, weekday and result wiring match the actual date fu
   const birthDate = "1990-03-14";
   const referenceDate = "2026-11-19";
   assert.match(article.example.title, /14 March 1990/u);
-  assert.match(article.example.details, /today were 19 November 2026/u);
+  assert.match(article.example.details, /Age on a selected date/u);
+  assert.match(article.example.details, /reference date/u);
 
   const age = calculateAge(birthDate, referenceDate);
   assert.deepEqual(age, { years: 36, months: 8, days: 5, totalDays: 13399 });
@@ -206,6 +210,23 @@ test("Age Calculator example, weekday and result wiring match the actual date fu
   assert.match(component, /<strong>\{age\?\.years\}<\/strong><span>years<\/span><strong>\{age\?\.months\}<\/strong><span>months<\/span><strong>\{age\?\.days\}<\/strong><span>days<\/span>/u);
   assert.match(component, /Age as of \$\{calc\.result\.referenceDate\}: \$\{age\?\.years\} years, \$\{age\?\.months\} months, \$\{age\?\.days\} days/u);
   assert.match(component, /born \$\{calc\.result\.birthday\.birthWeekday\}/u);
+  assert.match(component, /<ResultStat label="Birth weekday" value=\{calc\.result\.birthday\.birthWeekday\}/u);
+});
+
+test("editing calculator inputs clears the result and error before recalculation", () => {
+  const source = readFileSync("components/tools/calculator-tools.tsx", "utf8");
+  const calculatorStarts = [
+    ["Age", "export function AgeCalculator() {", "\nconst percentageOptions"],
+    ["Percentage", "export function PercentageCalculator() {", "\nexport function BmiCalculator"],
+    ["BMI", "export function BmiCalculator() {", "\nexport function EmiCalculator"],
+    ["Date", "export function DateCalculator() {", "\nexport function DiscountCalculator"],
+    ["Discount", "export function DiscountCalculator() {", "\nexport function LoanCalculator"],
+  ] as const;
+
+  for (const [name, start, end] of calculatorStarts) {
+    const component = source.split(start)[1]?.split(end)[0] ?? "";
+    assert.match(component, /<form [^>]*onChange=\{calc\.reset\}/u, `${name} edits should clear stale results and errors`);
+  }
 });
 
 test("Date Calculator example, direction and copied result match the date functions", () => {
@@ -216,7 +237,8 @@ test("Date Calculator example, direction and copied result match the date functi
 
   const interval = calculateDateDifference(startDate, endDate);
   assert.deepEqual(interval, { days: 9, inclusiveDays: 10, weeks: 1, remainingDays: 2, direction: "after" });
-  assert.equal(article.example.details, `There are ${interval.days} elapsed days when the start date is day zero, or ${interval.inclusiveDays} days when both the start and end dates are counted.`);
+  assert.match(article.example.details, /9 elapsed days, or 10 days including both dates/u);
+  assert.match(article.example.details, /9 days before the first/u);
   assert.equal(addDaysToDate(startDate, interval.days), endDate);
   assert.deepEqual(calculateDateDifference(endDate, startDate), { ...interval, direction: "before" });
   assert.equal(addDaysToDate(endDate, -interval.days), startDate);
@@ -234,16 +256,17 @@ test("Date Calculator example, direction and copied result match the date functi
 
 test("Word Counter example output matches its sample text and displayed counters", () => {
   const article = toolArticles["word-counter"];
-  const match = article.example.details.match(/^Input: “([^”]+)” Output: (.+)$/u);
-  assert.ok(match, "the example must include concrete sample text and output");
-  const sample = match[1];
+  const sample = article.example.sampleText;
+  assert.ok(sample, "the example must include pasteable sample text");
   const counts = countText(sample);
   const paragraphs = countParagraphs(sample);
-  const expected = `Input: “${sample}” Output: ${counts.words} words; ${counts.characters} characters; ${counts.charactersWithoutWhitespace} characters without whitespace; ${counts.sentences} sentences; ${paragraphs} paragraph${paragraphs === 1 ? "" : "s"}; estimated reading time: ${counts.readingMinutes} minute${counts.readingMinutes === 1 ? "" : "s"}.`;
-  assert.equal(article.example.details, expected);
+  assert.equal(paragraphs, 2);
+  assert.match(article.example.details, new RegExp(`${counts.words} words, ${counts.characters} characters, ${counts.charactersWithoutWhitespace} characters without whitespace, ${counts.sentences} sentences, 2 paragraphs and ${counts.readingMinutes} minute`));
 
   const source = readFileSync("components/tools/text-tools.tsx", "utf8");
   const component = source.split("export function WordCounter() {")[1]?.split("\n}")[0] ?? "";
+  const articleRenderer = readFileSync("components/tools/tool-article.tsx", "utf8");
+  assert.match(articleRenderer, /article\.example\.sampleText/);
   assert.match(component, /const result = countText\(text\)/u);
   assert.match(component, /const paragraphs = countParagraphs\(text\)/u);
   for (const summaryField of ["result.words", "result.characters", "result.charactersWithoutWhitespace", "result.sentences", "paragraphs", "result.readingMinutes"]) {

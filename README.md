@@ -5,7 +5,7 @@ A responsive collection of free browser-based calculators, text tools, converter
 ## Start locally
 
 1. Use Node.js 20.9 or newer.
-2. Copy `.env.example` to `.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the real HTTPS production origin before publishing. Do not use a placeholder domain. Set `NEXT_PUBLIC_CONTACT_EMAIL` to a monitored public inbox.
+2. Copy `.env.example` to `.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the real HTTPS production origin before publishing. The default public inbox is `contact@qitool.tech`.
 3. Run `npm install`.
 4. Run `npm run dev` and open the local URL printed by Next.js.
 
@@ -41,8 +41,8 @@ The application sets a restrictive Content Security Policy and baseline browser 
 ## Before launch
 
 - Set `NEXT_PUBLIC_SITE_URL` to the chosen domain; it supplies canonical metadata, sitemap URLs, and the robots sitemap reference.
-- Set `NEXT_PUBLIC_CONTACT_EMAIL` to a monitored support/privacy inbox. Check the published mail link and confirm that the mailbox receives messages. Until then the page explains that email support is unavailable.
-- Confirm who operates QITOOL. Set the optional `NEXT_PUBLIC_PUBLISHER_NAME` to the approved public name if it should appear on About.
+- About and Contact use `contact@qitool.tech` by default. To change the published inbox, set `NEXT_PUBLIC_CONTACT_EMAIL`, rebuild and check both mail links.
+- About and Terms identify Nikhil Chaudhary as publisher. To change this name, set `NEXT_PUBLIC_PUBLISHER_NAME` and rebuild.
 - Identify the production hosting/CDN provider and update the privacy policy with its actual request-log, retention, and cookie practices.
 - Review legal copy for the operating jurisdiction and final services/data flows.
 - Review the privacy policy and consent behavior before enabling the optional analytics integration or adding any other third-party service. The GA4 tag remains blocked until an explicit opt-in.

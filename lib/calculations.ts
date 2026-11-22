@@ -51,23 +51,18 @@ function addCalendarMonths(date: CalendarDate, monthCount: number): CalendarDate
 export type AgeResult = { years: number; months: number; days: number; totalDays: number };
 
 function calendarAgeBetween(birth: CalendarDate, asOf: CalendarDate): AgeResult {
-  let years = asOf.year - birth.year;
-  let yearAnchor = addCalendarMonths(birth, years * 12);
-  if (yearAnchor.epoch > asOf.epoch) {
-    years -= 1;
-    yearAnchor = addCalendarMonths(birth, years * 12);
-  }
-
-  let months = (asOf.year - yearAnchor.year) * 12 + asOf.month - yearAnchor.month;
-  let monthAnchor = addCalendarMonths(yearAnchor, months);
+  // Always anchor to the birth day so a February 28 anniversary in one year
+  // does not shift the next leap-year anniversary off February 29.
+  let completedMonths = (asOf.year - birth.year) * 12 + asOf.month - birth.month;
+  let monthAnchor = addCalendarMonths(birth, completedMonths);
   if (monthAnchor.epoch > asOf.epoch) {
-    months -= 1;
-    monthAnchor = addCalendarMonths(yearAnchor, months);
+    completedMonths -= 1;
+    monthAnchor = addCalendarMonths(birth, completedMonths);
   }
 
   return {
-    years,
-    months,
+    years: Math.floor(completedMonths / 12),
+    months: completedMonths % 12,
     days: Math.floor((asOf.epoch - monthAnchor.epoch) / DAY_MS),
     totalDays: Math.floor((asOf.epoch - birth.epoch) / DAY_MS),
   };
@@ -137,9 +132,14 @@ export function calculatePercentage(mode: PercentageMode, first: number, second:
     };
   }
   if (mode === "difference") {
-    const averageMagnitude = (Math.abs(first) + Math.abs(second)) / 2;
-    if (averageMagnitude === 0) throw new Error("At least one value must be non-zero to calculate percentage difference.");
-    const value = (Math.abs(first - second) / averageMagnitude) * 100;
+    const scale = Math.max(Math.abs(first), Math.abs(second));
+    if (scale === 0) throw new Error("At least one value must be non-zero to calculate percentage difference.");
+    // Opposite signs span the entire sum of magnitudes. For like signs, subtract
+    // before scaling to preserve the difference between nearby floating-point values.
+    const smaller = Math.min(Math.abs(first), Math.abs(second));
+    const value = Math.sign(first) !== Math.sign(second)
+      ? 200
+      : ((scale - smaller) / scale) / (1 + smaller / scale) * 200;
     return { value: requireFiniteResult(value), label: `Percentage difference between ${first} and ${second}`, direction: null };
   }
   throw new Error("Choose a percentage calculation type.");
@@ -368,7 +368,7 @@ const graphemeMarkPattern = /\p{Mark}/u;
 const emojiModifierPattern = /\p{Emoji_Modifier}/u;
 const extendedPictographicPattern = /\p{Extended_Pictographic}/u;
 const regionalIndicatorPattern = /\p{Regional_Indicator}/u;
-const graphemeControlPattern = /[\p{Cc}\p{Zl}\p{Zp}]/u;
+const graphemeControlPattern = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
 
 type HangulGraphemeClass = "L" | "V" | "T" | "LV" | "LVT";
 
@@ -383,7 +383,8 @@ function isGraphemeExtend(character: string): boolean {
 }
 
 function isGraphemeControl(character: string): boolean {
-  return graphemeControlPattern.test(character);
+  return graphemeControlPattern.test(character) && character !== "\u200d" &&
+    !isGraphemeExtend(character) && !isGraphemePrepend(character);
 }
 
 function isGraphemePrepend(character: string): boolean {
@@ -422,7 +423,8 @@ function joinsIndicConjunct(characters: string[], currentIndex: number): boolean
 
   let precedingIndex = currentIndex - 1;
   let hasLinker = false;
-  while (precedingIndex >= 0 && (isGraphemeExtend(characters[precedingIndex]) || characters[precedingIndex] === "\u200c" || characters[precedingIndex] === "\u200d")) {
+  while (precedingIndex >= 0 && (isGraphemeExtend(characters[precedingIndex]) || characters[precedingIndex] === "\u200d")) {
+    if (characters[precedingIndex] === "\u200c") return false;
     if (isIndicLinker(characters[precedingIndex])) hasLinker = true;
     precedingIndex -= 1;
   }

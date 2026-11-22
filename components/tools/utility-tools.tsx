@@ -31,11 +31,19 @@ export function PasswordGenerator() {
       setError(cause instanceof Error ? cause.message : "Could not generate a password.");
     }
   };
-  const reset = () => { setLength("16"); setOptions(defaultPasswordOptions); dispatchPassword({ type: "reset" }); setError(""); };
+  const clearResult = () => {
+    dispatchPassword({ type: "reset" });
+    setError("");
+  };
+  const reset = () => {
+    setLength("16");
+    setOptions(defaultPasswordOptions);
+    clearResult();
+  };
   const toggle = (name: keyof PasswordOptions) => setOptions((current) => ({ ...current, [name]: !current[name] }));
 
   return <>
-    <form noValidate className="tool-form" onSubmit={create}>
+    <form noValidate className="tool-form" onSubmit={create} onChange={clearResult}>
       <NumberField id="password-length" label="Password length" value={length} onChange={setLength} min={8} max={128} step={1} hint="Choose 8 to 128 characters." />
       <fieldset className="tool-checks"><legend>Include character types</legend>
         {(Object.entries({ lowercase: "Lowercase letters (a-z)", uppercase: "Uppercase letters (A-Z)", numbers: "Numbers (0-9)", symbols: "Symbols (!@#…)" }) as [keyof PasswordOptions, string][]).map(([name, label]) => <label className="tool-checkbox" key={name}><input type="checkbox" checked={options[name]} onChange={() => toggle(name)} /><span>{label}</span></label>)}

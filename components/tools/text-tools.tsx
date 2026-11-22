@@ -13,7 +13,7 @@ export function WordCounter() {
   const [text, setText] = useState("");
   const result = countText(text);
   const paragraphs = countParagraphs(text);
-  const copyText = `Words: ${result.words}; characters: ${result.characters}; characters without whitespace: ${result.charactersWithoutWhitespace}; sentences: ${result.sentences}; paragraphs: ${paragraphs}; estimated reading time: ${result.readingMinutes} minutes.`;
+  const copyText = `Words: ${result.words}; characters: ${result.characters}; characters without whitespace: ${result.charactersWithoutWhitespace}; sentences: ${result.sentences}; paragraphs: ${paragraphs}; estimated reading time: ${result.readingMinutes} ${result.readingMinutes === 1 ? "minute" : "minutes"}.`;
   return <div className="live-text-tool">
     <label className="tool-field" htmlFor="word-counter-text"><span>Text to count</span><textarea id="word-counter-text" className="tool-textarea" value={text} onChange={(event) => setText(event.target.value)} placeholder="Type or paste your text here…" /></label>
     <div className="live-tool-actions"><TextToolReset onReset={() => setText("")} /><CopyButton text={copyText} label="Copy count summary" /></div>

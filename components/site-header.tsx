@@ -35,7 +35,7 @@ export function SiteHeader() {
 
         <DesktopNavigation links={mainLinks} />
         <div className="header-tools">
-          <Link href="/tools#tool-search" className="header-cta"><Search size={15} aria-hidden="true" /><span>Search</span></Link>
+          <Link href="/tools#tool-search" className="header-cta" aria-label="Search tools"><Search size={15} aria-hidden="true" /><span>Search</span></Link>
           <ThemeToggle />
         </div>
         <MobileNavigation links={[...mainLinks, { label: "Search tools", href: "/tools#tool-search" }]} />

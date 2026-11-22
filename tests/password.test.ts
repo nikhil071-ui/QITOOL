@@ -38,6 +38,8 @@ test("Password Generator uses the visibility reducer for generation, reveal, and
   assert.match(generator, /dispatchPassword\(\{ type: "generated", password:/u);
   assert.match(generator, /dispatchPassword\(\{ type: "toggle" \}\)/u);
   assert.match(generator, /dispatchPassword\(\{ type: "reset" \}\)/u);
+  assert.match(generator, /<form [^>]*onChange=\{clearResult\}/u);
+  assert.match(generator, /const clearResult = \(\) => \{\s*dispatchPassword\(\{ type: "reset" \}\);\s*setError\(""\);/u);
 });
 
 test("password generator returns the selected length and includes every requested set", () => {

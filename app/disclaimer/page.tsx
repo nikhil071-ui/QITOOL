@@ -9,7 +9,7 @@ export default function DisclaimerPage() {
       <div className="page-shell">
         <PageIntro title="Disclaimer" description="A few notes about estimates, information, and responsible use of online tools." crumbs={[{ label: "Disclaimer" }]} />
         <article className="prose-card legal-copy">
-          <p className="legal-updated">Last updated: November 20, 2026</p>
+          <p className="legal-updated">Last updated: November 22, 2026</p>
           <h2>General information</h2>
           <p>QITOOL provides general-purpose tools and explanatory content. Information and outputs are offered for general convenience and may not fit every situation.</p>
           <h2>Estimates and decisions</h2>
@@ -17,7 +17,7 @@ export default function DisclaimerPage() {
           <h2>Accuracy and availability</h2>
           <p>We work to make each tool clear and accurate, but outputs may contain errors or may not fit every situation. Availability and behavior can change as the website is improved. You are responsible for checking whether a result suits your use.</p>
           <h2>External links and advertising</h2>
-          <p>Links to external websites, if added, are provided for convenience. QITOOL does not control their content. Any future advertisements will be identified and kept separate from the tools.</p>
+          <p>QITOOL links to external references, including CDC guidance on adult BMI, GST Council rate notifications, and NIST unit-conversion factors. The organizations that publish those resources maintain their content. QITOOL currently displays no advertising.</p>
         </article>
       </div>
     </main>

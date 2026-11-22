@@ -11,7 +11,7 @@ export function ToolField({ id, label, hint, children }: FieldProps) {
     <div className="tool-field">
       <label htmlFor={id}>{label}</label>
       {children}
-      {hint && <p className="tool-field-hint">{hint}</p>}
+      {hint && <p id={`${id}-hint`} className="tool-field-hint">{hint}</p>}
     </div>
   );
 }
@@ -31,7 +31,7 @@ type NumberFieldProps = {
 export function NumberField({ id, label, value, onChange, hint, min, max, step = "any", placeholder }: NumberFieldProps) {
   return (
     <ToolField id={id} label={label} hint={hint}>
-      <input id={id} className="tool-input" type="number" inputMode="decimal" value={value} min={min} max={max} step={step} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+      <input id={id} aria-describedby={hint ? `${id}-hint` : undefined} className="tool-input" type="number" inputMode="decimal" value={value} min={min} max={max} step={step} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
     </ToolField>
   );
 }
@@ -50,19 +50,19 @@ type TextFieldProps = {
 export function TextField({ id, label, value, onChange, hint, type = "text", placeholder, maxLength }: TextFieldProps) {
   return (
     <ToolField id={id} label={label} hint={hint}>
-      <input id={id} className="tool-input" type={type} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} />
+      <input id={id} aria-describedby={hint ? `${id}-hint` : undefined} className="tool-input" type={type} value={value} placeholder={placeholder} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} />
     </ToolField>
   );
 }
 
 export type SelectOption = { value: string; label: string };
 
-type SelectFieldProps = { id: string; label: string; value: string; onChange: (value: string) => void; options: SelectOption[]; hint?: string };
+type SelectFieldProps = { id: string; label: string; value: string; onChange: (value: string) => void; options: SelectOption[]; hint?: string; disabled?: boolean };
 
-export function SelectField({ id, label, value, onChange, options, hint }: SelectFieldProps) {
+export function SelectField({ id, label, value, onChange, options, hint, disabled }: SelectFieldProps) {
   return (
     <ToolField id={id} label={label} hint={hint}>
-      <select id={id} className="tool-input tool-select" value={value} onChange={(event) => onChange(event.target.value)}>
+      <select id={id} aria-describedby={hint ? `${id}-hint` : undefined} className="tool-input tool-select" value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)}>
         {options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
       </select>
     </ToolField>

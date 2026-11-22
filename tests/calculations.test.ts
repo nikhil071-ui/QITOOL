@@ -16,6 +16,8 @@ test("age calculator handles exact calendar ages, birthdays, and leap days", () 
   assert.throws(() => calculateAge("2027-01-01", "2026-11-19"), /future/);
   assert.throws(() => calculateAge("2023-02-29", "2026-11-19"), /real calendar/);
   assert.throws(() => calculateAge("2000-02-29", "2000-02-28"), /future/);
+  assert.deepEqual(calculateAge("2000-02-29", "2004-02-27"), { years: 3, months: 11, days: 29, totalDays: 1459 });
+  assert.deepEqual(calculateAge("2000-02-29", "2004-02-28"), { years: 3, months: 11, days: 30, totalDays: 1460 });
   assert.deepEqual(calculateAge("2000-02-29", "2004-02-29"), { years: 4, months: 0, days: 0, totalDays: 1461 });
   assert.throws(() => calculateAge("", "2026-11-19"), /date of birth/);
   assert.throws(() => calculateAge("2000-01-01", "2024-02-30"), /real calendar/);
@@ -72,6 +74,19 @@ test("percentage difference display and clipboard include context and percent un
   assert.equal(presentation.copyText, `${result.label}: ${presentation.displayText}.`);
   assert.match(presentation.copyText, /Percentage difference between 80 and 100:/);
   assert.match(presentation.copyText, /%\.$/);
+});
+
+test("percentage difference stays symmetric for huge and subnormal finite operands", () => {
+  for (const [first, second, expected] of [
+    [1e308, 1.1e308, 200 / 21],
+    [-Number.MAX_VALUE, Number.MAX_VALUE, 200],
+    [Number.MIN_VALUE, 0, 200],
+    [Number.MIN_VALUE, 2 * Number.MIN_VALUE, 200 / 3],
+  ]) {
+    assert.ok(Math.abs(calculatePercentage("difference", first, second).value - expected) < 1e-12);
+    assert.ok(Math.abs(calculatePercentage("difference", second, first).value - expected) < 1e-12);
+  }
+  assert.throws(() => calculatePercentage("difference", 0, 0), /non-zero/);
 });
 
 test("BMI supports metric and imperial inputs and rejects unsafe values", () => {
@@ -253,6 +268,9 @@ test("character counter grapheme fallback matches Intl.Segmenter for Unicode cas
     { name: "keycap sequence", text: "1️⃣", characters: 1, withoutWhitespace: 1 },
     { name: "Devanagari conjunct", text: "क्ष", characters: 1, withoutWhitespace: 1 },
     { name: "Devanagari conjunct with ZWJ", text: "क्‍ष", characters: 1, withoutWhitespace: 1 },
+    { name: "Devanagari conjunct blocked by ZWNJ", text: "\u0915\u094d\u200c\u0937", characters: 2, withoutWhitespace: 2 },
+    { name: "format control before combining mark", text: "\u2060\u0301", characters: 2, withoutWhitespace: 2 },
+    { name: "format character that prepends", text: "\u0600A", characters: 1, withoutWhitespace: 1 },
     { name: "Hangul jamo sequence", text: "가", characters: 1, withoutWhitespace: 1 },
     { name: "non-emoji ZWJ", text: "a‍b", characters: 2, withoutWhitespace: 2 },
     { name: "CRLF line break", text: "A\r\nB", characters: 3, withoutWhitespace: 2 },

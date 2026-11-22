@@ -10,6 +10,7 @@ export type ToolArticle = {
   example: {
     title: string;
     details: string;
+    sampleText?: string;
     jumpLabel?: string;
     loanComparison?: { principal: number; annualRatePercent: number; tenures: number[] };
   };
@@ -26,14 +27,13 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Calculate a calendar age today or choose a cutoff date to see how old someone was on that date. For the calendar gap between two people, use the birth-date comparison.",
     whatItDoes: "The calculator compares calendar dates rather than dividing total days by 365. A February 29 birthday uses February 28 as its anniversary in non-leap years. Age on a selected date requires the birth date to be on or before that reference date. Age difference compares the earlier birth date to the later one.",
     instructions: ["Choose current age, age on a selected date, or compare two birth dates.", "Enter the birth date and, for a selected-date calculation, the reference date. The birth date must not be after it.", "Select Calculate and review the calendar age, total days and, for current age, birthday details."],
-    example: { title: "A birthday on 14 March 1990", details: "If today were 19 November 2026, the calendar age would be 36 years, 8 months, and 5 days." },
+    example: { title: "A birthday on 14 March 1990", details: "Choose Age on a selected date. Enter 14 March 1990 as the birth date and 19 November 2026 as the reference date. The result is 36 years, 8 months, and 5 days." },
     resultExplanation: "Years and months are completed calendar periods, and remaining days follow those periods. The birthday countdown uses the next calendar anniversary; the tool does not store a birth date or represent a medical or legal age record.",
     faqs: [
       { question: "Does this account for leap years?", answer: "Yes. Date arithmetic uses real calendar month lengths. For a February 29 birthday in a non-leap year, this calculator uses February 28 as the anniversary date." },
-      { question: "Can I compare two birth dates?", answer: "Yes. Choose Age difference, enter both dates, and the calculator reports the complete calendar interval and total elapsed days." },
+      { question: "Can I compare two birth dates?", answer: "Yes. Choose Compare two birth dates, enter both dates, and the calculator reports the complete calendar interval and total elapsed days." },
       { question: "Can I calculate age on a specific date?", answer: "Yes. Choose Age on a selected date, enter the birth date and cutoff date, then calculate the completed calendar years, months and days on that date." },
       { question: "How is the birthday countdown calculated?", answer: "It counts whole calendar days until the next anniversary. A leap-day birthday uses February 28 in a non-leap year, matching the age calculation convention shown on this page." },
-      { question: "Is my birth date sent to a server?", answer: "No. The calculation runs in this browser and the selected date is not saved by QITOOL." },
     ],
     related: ["date-calculator"],
   },
@@ -43,11 +43,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Choose the question you want to answer. For a test score, compare the part with the whole. For a change in price, put the original price first. Use percentage difference when neither value is the starting point.",
     whatItDoes: "Percent of multiplies the value by the rate and divides by 100. Percentage change divides the signed difference by the starting value. Percentage difference divides the absolute difference by the average magnitude of the two values; two zero values have no defined comparison.",
     instructions: ["Choose the question that matches your calculation.", "Enter the percentage or values in the labeled fields.", "Select Calculate to view and copy the result."],
-    example: { title: "What is 15% of 240?", details: "Multiply 240 by 15 and divide by 100. The result is 36." },
-    resultExplanation: "The display uses up to eight significant digits. A part or a change is expressed as a percentage. A percentage of an amount has the same unit as that amount. For a negative starting value, interpret the signed ratio together with the direction of the original numbers.",
+    example: { title: "Change or difference?", details: "From −100 to −50, the value rises by 50. The signed change ratio is 50 ÷ (−100) = −0.5, so the tool reports an increase of 50%. Comparing 80 and 100 in difference mode uses their average of 90. The gap of 20 gives about 22.22% in either order." },
+    resultExplanation: "The display uses up to eight significant digits. A part or a change is expressed as a percentage. A percentage of an amount has the same unit as that amount. Change is labeled by whether the ending value is higher or lower. The percentage shows the magnitude of the change relative to the starting value.",
     faqs: [
       { question: "How do I calculate a percentage of a number?", answer: "Multiply the number by the percentage and divide by 100. For example, 20% of 80 is 80 × 20 ÷ 100 = 16." },
-      { question: "Why can't percentage change start at zero?", answer: "Percentage change divides the difference by the starting value. Division by zero has no defined percentage result." },
+      { question: "What happens if the starting value is zero?", answer: "From zero to zero the tool displays “No change”. A move from zero to any other value has no defined percentage change because the denominator is zero." },
       { question: "How is percentage difference different from percentage change?", answer: "Percentage difference compares two values against their average magnitude and has no direction. Percentage change uses a starting value as the baseline and measures the signed change relative to that value." },
     ],
     related: ["discount-calculator", "gst-calculator"],
@@ -58,13 +58,12 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "This BMI calculator uses adult screening categories for people aged 20 and older only. Choose kilograms and centimetres or pounds and total inches. Children and teenagers need age-specific BMI interpretation.",
     whatItDoes: "BMI is weight in kilograms divided by height in metres squared. For imperial inputs, this tool converts pounds to kilograms and inches to metres before applying the same formula. Its adult screening categories are for people aged 20 and older, not children or teenagers, and do not diagnose health or measure body composition.",
     instructions: ["Choose metric or imperial units.", "Enter weight in kg and height in cm, or weight in lb and height in total inches. For 5 ft 9 in, enter 69 in.", "Select Calculate BMI and read the value and category with the limitations below."],
-    example: { title: "A metric example", details: "At 70 kg and 175 cm, BMI is 70 ÷ 1.75², or about 22.9." },
+    example: { title: "Two measurements at the category boundary", details: "At 200 cm, 99.9 kg gives 99.9 ÷ 2² = 24.975. This displays as 25.0 and falls within the adult reference range. At 100 kg the unrounded BMI is exactly 25, so the category moves above the reference range even though the display still reads 25.0." },
     resultExplanation: "For adults aged 20 and older, the categories use the unrounded BMI: below 18.5, 18.5 to under 25, 25 to under 30, and 30 or above. The displayed BMI is rounded to one decimal place. BMI does not distinguish muscle from fat and should not be used alone to assess health.",
     faqs: [
       { question: "Can BMI diagnose a health condition?", answer: "No. It is a screening measure only. A clinician can interpret it alongside other information and personal circumstances." },
       { question: "Who should not use adult BMI ranges?", answer: "Adult categories are for people aged 20 and older, not children or teenagers, who need age-specific BMI interpretation. Results may also be misleading during pregnancy, for some athletes, and for some older adults. Seek individualized guidance when needed." },
       { question: "How do I enter feet and inches?", answer: "Multiply feet by 12 and add the remaining inches. For example, 5 feet 6 inches is 66 inches. Enter 66 in imperial mode." },
-      { question: "Are my measurements stored?", answer: "No. The calculation is performed in the browser and the values are not saved or sent to QITOOL." },
     ],
     related: ["unit-converter"],
   },
@@ -112,8 +111,8 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Enter two dates to see both elapsed days, which exclude the start date, and an inclusive count, which counts both dates. You can also add or subtract days or look up a weekday.",
     whatItDoes: "Date difference counts days after the first date up to the second date for elapsed time. The inclusive count includes both endpoint dates, so it is one greater than the elapsed count. Add/subtract mode uses whole integer days and follows Gregorian month lengths and leap years. Weekdays use UTC calendar arithmetic.",
     instructions: ["Choose days between two dates, add or subtract days, or find a weekday.", "For an interval, enter a start and end date. The results show elapsed days and a separate inclusive total.", "Select Calculate to see the counts, direction and weekday details. Use Reset to start over."],
-    example: { title: "How many days from 1 January to 10 January?", details: "There are 9 elapsed days when the start date is day zero, or 10 days when both the start and end dates are counted." },
-    resultExplanation: "The difference is also shown as full weeks and remaining days. The direction identifies whether the second date is before or after the first, and weekday labels use the Gregorian calendar.",
+    example: { title: "How many days from 1 January to 10 January?", details: "From 1 January to 10 January there are 9 elapsed days, or 10 days including both dates. Reverse the dates and the counts stay the same. The second date is now 9 days before the first." },
+    resultExplanation: "Weekends and public holidays count toward the total. The difference is also shown as full weeks and remaining days. The direction identifies whether the second date is before or after the first, and weekday labels use the Gregorian calendar.",
     faqs: [
       { question: "What is the difference between elapsed and inclusive days?", answer: "Elapsed days exclude the start date. The inclusive count includes both the start and end dates, so it is one greater than the elapsed count, including when both dates are the same." },
       { question: "Does adding days handle leap years?", answer: "Yes. Date arithmetic follows the Gregorian calendar, including February 29 in leap years." },
@@ -125,7 +124,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "Discount Calculator for Sale Price and Savings",
     seoDescription: "Calculate the final price and savings from a percentage discount in INR. Check a sale price before adding tax, delivery or another offer.",
     introduction: "Enter the price before the offer and the advertised percentage off. The result shows rupees saved and the price left to pay before additional charges.",
-    whatItDoes: "Savings equal the original price multiplied by the discount rate. Final price is the original amount minus savings; a 100% discount produces a zero final price.",
+    whatItDoes: "Savings = original price × entered percentage ÷ 100. The calculator rounds the original price to whole paise, then rounds savings half up to the nearest paise. Subtracting those savings from the rounded original gives the amount to pay.",
     instructions: ["Enter the original price in rupees.", "Enter a discount from 0% to 100%.", "Select Calculate discount to see savings and the final price."],
     example: { title: "20% off ₹2,500", details: "You save ₹500 and pay ₹2,000 before any additional taxes or delivery charges." },
     resultExplanation: "The final price does not include additional taxes, shipping, fees, coupons, or store-specific rounding unless those values are included separately in the original amount.",
@@ -146,7 +145,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Follow a fixed-rate rupee loan from its opening balance to its last payment. Inspect the first twelve monthly rows here and download the full schedule to check a later month.",
     whatItDoes: "This calculator produces a reducing-balance amortization schedule for up to 600 monthly payments. It assumes regular end-of-month payments and no extra payments, fees, or rate changes.",
     instructions: ["Enter the principal, annual interest rate, and repayment term in months.", "Select Calculate repayment plan.", "Review totals and the first twelve monthly schedule rows. Copy the summary or download the complete schedule as CSV."],
-    example: { title: "₹3,00,000 at 10% for 36 months", details: "The estimated payment is about ₹9,680 per month. The schedule shows the interest share falling as the outstanding balance decreases." },
+    example: { title: "₹3,00,000 at 10% for 36 months", details: "The first payment is ₹9,680.16. Interest on the opening balance is ₹3,00,000 × 10% ÷ 12 = ₹2,500.00. The other ₹7,180.16 reduces the principal, leaving ₹2,92,819.84 for the next month." },
     resultExplanation: "Each row uses whole paise. The principal paid to date is rounded at each month, and interest is rounded on that month’s opening balance. The final row clears the balance. A lender’s schedule may differ due to dates, fees, rounding policies, or rate changes.",
     faqs: [
       { question: "How is the schedule calculated?", answer: "Each month, interest is calculated from the remaining balance and monthly rate. The rest of the fixed payment reduces principal." },
@@ -158,12 +157,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "Word Counter with Paragraphs and Reading Time",
     seoDescription: "Count words, paragraphs, sentences and characters in a draft. Estimate reading time at 200 words per minute and copy the counts without uploading text.",
     introduction: "Paste the part of your draft that counts toward a word limit. The totals update as you edit, alongside a paragraph count and an estimated reading time rounded up to whole minutes.",
-    whatItDoes: "Words use Unicode-aware word segmentation when available. Characters are counted as visible graphemes, paragraphs are non-empty text blocks separated by a blank line, and reading time is estimated at 200 words per minute, rounded up for non-empty text.",
+    whatItDoes: "Words use Unicode-aware word segmentation when available. Characters are counted as visible graphemes, paragraphs are non-empty text blocks separated by a blank line, and reading time is estimated at 200 words per minute, rounded up when at least one word is counted. Punctuation alone, such as “!!!”, gives zero words and zero minutes.",
     instructions: ["Paste or type text into the editor.", "Review live words, characters, characters without whitespace, sentences, paragraphs, and reading time.", "Copy the summary if needed, or use Clear text to empty the editor."],
-    example: { title: "Count a short sample", details: "Input: “Count these words. Spaces matter!” Output: 5 words; 33 characters; 29 characters without whitespace; 2 sentences; 1 paragraph; estimated reading time: 1 minute." },
+    example: { title: "Count two paragraphs", sampleText: "Red fox.\n\nBlue sky!", details: "The blank line separates the paragraphs. The result is 4 words, 19 characters, 15 characters without whitespace, 2 sentences, 2 paragraphs and 1 minute of estimated reading time." },
     resultExplanation: "Word boundaries can vary by language and writing system. A paragraph means a non-empty block separated from the next block by a blank line. The reading-time estimate is a guide; actual speed varies by reader and text difficulty.",
     faqs: [
-      { question: "Is my text sent anywhere?", answer: "No. The counter works in the current page and does not save or transmit the text." },
       { question: "How is reading time estimated?", answer: "The counter uses 200 words per minute and rounds up. It is only a rough estimate." },
       { question: "How are sentences counted?", answer: "Sentence counts are estimated from punctuation such as periods, question marks, and exclamation marks. Abbreviations or unusual punctuation can affect the count." },
       { question: "What counts as a paragraph?", answer: "A paragraph is a non-empty block separated from the next block by a blank line. A single line break alone does not start a new paragraph." },
@@ -176,7 +174,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Paste a caption, form entry or message to count its visible characters. Compare the full length with the total after spaces, tabs and line breaks are removed.",
     whatItDoes: "Characters are counted as visible grapheme clusters, using Intl.Segmenter when available and a fallback for common Unicode sequences otherwise. It reports characters with all text, characters excluding whitespace, whitespace characters, words, and lines (including an empty final line after a line break).",
     instructions: ["Type or paste text into the editor.", "Review the live character and line counts.", "Copy the summary or choose Clear text to empty the field."],
-    example: { title: "Text with an emoji", details: "In a browser with grapheme segmentation, “Hi 👋” counts as four visible characters, or three without the space. A joined family emoji can also occupy just one visible position." },
+    example: { title: "Text with an emoji", details: "In a browser with grapheme segmentation, “Hi 👋” counts as four visible characters, or three without the space. The family emoji 👩‍👩‍👧‍👦 is one grapheme made from seven Unicode code points. A form that counts code points can report a different length." },
     resultExplanation: "“Without whitespace” removes spaces, tabs, and line breaks. Some platforms count characters differently, so compare the same counting convention used by your destination.",
     faqs: [
       { question: "Does an emoji count as one character?", answer: "Most emoji are counted as one visible grapheme, including joined sequences, in browsers that support Intl.Segmenter. A Unicode-aware fallback is used otherwise." },
@@ -190,11 +188,10 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     introduction: "Enter the final web address or short message you want someone to scan. Generate a static QR image in your browser, then download the PNG and test it at the size you plan to use.",
     whatItDoes: "The generator encodes text locally using the QR standard and a built-in QR library. A quiet margin and medium error correction are applied for ordinary scanning use.",
     instructions: ["Enter a complete web address or a short message. If a dense or multibyte message will not fit, shorten it and generate again.", "Select Generate QR code.", "Scan the preview or download the PNG. Keep the downloaded image intact so scanners can read it."],
-    example: { title: "A small event link", details: "Paste the public event URL, generate its code, then print or share the PNG. Test the downloaded image with a phone before distributing it." },
+    example: { title: "A small event link", details: "Generate a code for https://example.org/event-a. Change the input to https://example.org/event-b. The encoded content, copy action and PNG still refer to event-a until you select Generate QR code again. After regenerating, scan the new PNG and check that it reads https://example.org/event-b." },
     resultExplanation: "A QR code stores the entered text; it does not guarantee that a linked website is safe. Check links before opening them and only share QR codes containing information you intend to make public.",
     faqs: [
       { question: "Can I change the link after printing?", answer: "The static image encodes the original address. To use a different address, generate and print a new code. Content hosted at the original address can still change." },
-      { question: "Is my QR content uploaded?", answer: "No. QR encoding happens locally in your browser." },
       { question: "Can I encode a password or private note?", answer: "The tool does not upload the text, but anyone who can scan the resulting image can read the encoded content. Do not encode secrets." },
     ],
     related: ["image-compressor", "character-counter"],
@@ -211,7 +208,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
       { question: "Is the password sent or saved?", answer: "No. It is generated in your browser and is not sent to or stored by QITOOL. The output is masked until you reveal it. Reset clears it from the page." },
       { question: "Why does the tool require Web Crypto?", answer: "Math.random is not designed for secrets. This tool refuses to generate a password when cryptographically secure browser randomness is unavailable." },
     ],
-    related: ["qr-code-generator", "character-counter"],
+    related: [],
   },
   "unit-converter": {
     seoTitle: "Unit Converter with US and Imperial Gallons",
@@ -231,12 +228,11 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoTitle: "Image Compressor for JPEG, PNG and WebP",
     seoDescription: "Resize a local image, choose JPEG, PNG or WebP output, and compare the file size before downloading. Adjust quality or dimensions to fit an upload limit.",
     introduction: "Choose an image from your device, pick the longest edge you need and compare the new file with the original. The preview and byte counts help you decide whether to lower the quality or resize again.",
-    whatItDoes: "The compressor accepts local JPEG, PNG, and WebP images up to 20 MB and 40 megapixels, resizes them in a browser canvas, and exports with the requested supported MIME type. JPEG and WebP use the quality control; PNG is lossless and may not become smaller for every image.",
+    whatItDoes: "The compressor accepts local JPEG, PNG, and WebP images up to 20 MB and 40 megapixels, resizes them in a browser canvas, and exports with the requested supported MIME type. JPEG and WebP use the quality control. PNG preserves the pixels in the output grid and can produce a larger file.",
     instructions: ["Choose a JPEG, PNG, or WebP image no larger than 20 MB and 40 megapixels.", "Select an output type and quality for JPEG/WebP. PNG preserves transparency but does not use a lossy quality setting.", "Select Compress image, compare the preview and file sizes, then download if the result suits your needs."],
     example: { title: "A large photo for a web page", details: "A 4,000 × 3,000 photo exported with a 2,000-pixel longest edge becomes 2,000 × 1,500. Check the encoded file size and small details before replacing the original." },
-    resultExplanation: "Compression can reduce detail, especially at low JPEG/WebP quality. PNG is lossless. Browser support for WebP output varies; if an encoder is unavailable, choose JPEG or PNG.",
+    resultExplanation: "Resizing a 4,000 × 3,000 image to 2,000 × 1,500 leaves one quarter of the original pixels. PNG preserves that smaller grid exactly. It cannot restore the detail removed by resizing. Low JPEG or WebP quality can reduce detail further.",
     faqs: [
-      { question: "Are images uploaded?", answer: "No. Decoding, previewing, and encoding happen on your device." },
       { question: "Why can a PNG become larger?", answer: "PNG is lossless and some photographs do not compress well as PNG. Choose WebP or JPEG for photographic images when transparency is not required." },
       { question: "Does JPEG keep transparency?", answer: "No. Transparent pixels are flattened onto a white background when converting to JPEG." },
     ],
@@ -247,7 +243,7 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     seoDescription: "Type a practice passage for up to 60 seconds. See correct WPM, raw WPM and character accuracy, then restart with a fresh passage.",
     introduction: "Start the timer and type the displayed passage, including spaces and punctuation. When time runs out or you reach the passage length, compare your correct words per minute with your raw speed.",
     whatItDoes: "Correct words per minute uses the common five-character word convention. Accuracy is the fraction of typed characters that match the passage at the same position; the raw speed is also shown so errors are not hidden.",
-    instructions: ["Select Start test; the first start uses the initially displayed passage, and each later start cycles to a fresh passage.", "Focus the typing field and type the passage, including its punctuation and spaces.", "When the passage or 60-second timer ends, review speed and accuracy. Select Start again for a fresh passage or Reset to clear the current attempt."],
+    instructions: ["Select Start test; the first start uses the initially displayed passage, and each later start cycles to a fresh passage.", "Focus the typing field and type the passage, including its punctuation and spaces.", "When the passage or 60-second timer ends, review speed and accuracy. Select Start a new test for a fresh passage or Reset to clear the current attempt."],
     example: {
       title: "Score a timed excerpt of the first passage",
       details: `On initial page load, the first test uses this passage: “${typingPassages[0]}” If you type its first 125 characters by the end of the full 60-second timer and 120 match at the same positions, raw WPM is 25 (125 ÷ 5 ÷ 1 minute), correct WPM is 24 (120 ÷ 5 ÷ 1 minute), and accuracy is 96% (120 ÷ 125).`,
@@ -255,9 +251,9 @@ export const toolArticles: Record<string, Omit<ToolArticle, "commonMistakes">> =
     resultExplanation: "Scores are practice estimates, not a standardized certification. Keyboard layout, language, passage difficulty, and test duration affect comparisons.",
     faqs: [
       { question: "How is WPM calculated?", answer: "Correct characters are divided by five and then divided by elapsed minutes. Raw WPM uses all typed characters in the same way." },
-      { question: "Are my keystrokes recorded?", answer: "No. Typing is measured in the current page only and is not saved or sent to QITOOL." },
+      { question: "How do corrections affect my score?", answer: "The final text in the field is compared with the passage one position at a time. Fixing a mistyped letter before the run ends can improve accuracy. A missing letter can move every following letter out of position." },
     ],
-    related: ["word-counter", "character-counter"],
+    related: [],
   },
 };
 

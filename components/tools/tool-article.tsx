@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Info } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { AdSlot } from "@/components/ads/ad-slot";
 import { PageIntro } from "@/components/page-intro";
 import { ToolInterface } from "@/components/tools/tool-interface";
@@ -72,7 +72,6 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
             </div>
             <ToolInterface slug={tool.slug} />
           </section>
-          <aside className="tool-privacy-callout"><span><Info size={16} aria-hidden="true" /></span><p><strong>Private by design</strong> Inputs and results stay on this device. QITOOL does not save them.</p></aside>
         </div>
 
         <div className="tool-guide-grid">
@@ -81,6 +80,7 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
           <section className="tool-guide-card tool-example-card" id={article.example.jumpLabel ? "worked-example" : undefined}>
             <p className="eyebrow">PRACTICAL EXAMPLE</p>
             <h2>{article.example.title}</h2>
+            {article.example.sampleText && <pre className="whitespace-pre-wrap">{article.example.sampleText}</pre>}
             <p>{article.example.details}</p>
             {article.example.loanComparison && <EmiExampleTable {...article.example.loanComparison} />}
           </section>
@@ -110,10 +110,10 @@ export function ToolArticlePage({ tool, article }: { tool: ToolInfo; article: To
           </div>
         </section>
 
-        <section className="related-tools-section" aria-labelledby="related-tools-heading">
+        {relatedTools.length > 0 && <section className="related-tools-section" aria-labelledby="related-tools-heading">
           <div className="tool-section-heading"><p className="eyebrow">KEEP EXPLORING</p><h2 id="related-tools-heading">Related tools</h2></div>
           <div className="related-tools-grid">{relatedTools.map((related) => <Link className="related-tool-card" href={`/tools/${related.slug}`} key={related.slug}><span>{categoryLabels[related.category]}</span><strong>{related.name}</strong><p>{related.description}</p><b>Open tool <ArrowRight size={14} aria-hidden="true" /></b></Link>)}</div>
-        </section>
+        </section>}
       </div>
     </main>
   );

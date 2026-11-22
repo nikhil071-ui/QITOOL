@@ -20,7 +20,6 @@ const benefits = [
 ];
 
 const faqs = [
-  { question: "What is QITOOL?", answer: "QITOOL brings practical browser-based tools together in one place." },
   { question: "Are the tools free to use?", answer: "Yes. The tools listed here are free to use." },
   { question: "Do I need to create an account?", answer: "No. The tools work in your browser without an account. Inputs are not saved by QITOOL." },
 ];

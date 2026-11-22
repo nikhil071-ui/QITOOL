@@ -53,8 +53,8 @@ export function AgeCalculator() {
       : calc.result ? `Age as of ${calc.result.referenceDate}: ${age?.years} years, ${age?.months} months, ${age?.days} days (${age?.totalDays} total days).` : "";
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
-      <SelectField id="age-mode" label="Calculation" value={mode} onChange={(value) => { setMode(value as "age" | "age-on-date" | "difference"); calc.reset(); }} options={[{ value: "age", label: "Current age and next birthday" }, { value: "age-on-date", label: "Age on a selected date" }, { value: "difference", label: "Compare two birth dates" }]} />
+    <form noValidate className="tool-form" onSubmit={onSubmit} onChange={calc.reset}>
+      <SelectField id="age-mode" label="Calculation" value={mode} onChange={(value) => setMode(value as "age" | "age-on-date" | "difference")} options={[{ value: "age", label: "Current age and next birthday" }, { value: "age-on-date", label: "Age on a selected date" }, { value: "difference", label: "Compare two birth dates" }]} />
       <div className="tool-form-grid">
         <TextField id="birth-date" type="date" label={mode === "difference" ? "First date of birth" : "Date of birth"} value={birthDate} onChange={setBirthDate} hint="Dates are used only for this browser calculation." />
         {mode === "age-on-date" && <TextField id="age-on-date" type="date" label="Age on this date" value={ageOnDate} onChange={setAgeOnDate} hint="The birth date must be on or before this date." />}
@@ -68,6 +68,7 @@ export function AgeCalculator() {
       <div className="age-result"><strong>{age?.years}</strong><span>years</span><strong>{age?.months}</strong><span>months</span><strong>{age?.days}</strong><span>days</span></div>
       <p className="result-supporting">{formatValue(age?.totalDays ?? 0)} total days{calc.result.mode === "difference" ? " between the dates" : " since birth"}.</p>
       {calc.result.mode === "age" && <div className="result-stat-grid">
+        <ResultStat label="Birth weekday" value={calc.result.birthday.birthWeekday} />
         <ResultStat label="Next birthday" value={`${calc.result.birthday.daysUntilNextBirthday} ${calc.result.birthday.daysUntilNextBirthday === 1 ? "day" : "days"}`} />
         <ResultStat label="Next birthday date" value={`${calc.result.birthday.nextBirthday} (${calc.result.birthday.nextBirthdayWeekday})`} />
       </div>}
@@ -99,8 +100,8 @@ export function PercentageCalculator() {
   const presentation = calc.result ? formatPercentageResult(mode, calc.result) : null;
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
-      <SelectField id="percentage-mode" label="Calculation" value={mode} onChange={(value) => { setMode(value as PercentageMode); calc.reset(); }} options={percentageOptions} />
+    <form noValidate className="tool-form" onSubmit={onSubmit} onChange={calc.reset}>
+      <SelectField id="percentage-mode" label="Calculation" value={mode} onChange={(value) => setMode(value as PercentageMode)} options={percentageOptions} />
       <div className="tool-form-grid">
         <NumberField id="percentage-first" label={label} value={first} onChange={setFirst} />
         <NumberField id="percentage-second" label={secondLabel} value={second} onChange={setSecond} />
@@ -134,7 +135,6 @@ export function BmiCalculator() {
       }
     }
     setUnits(nextUnits);
-    calc.reset();
   };
   const reset = useReset(() => { setUnits("metric"); setWeight("70"); setHeight("175"); }, calc.reset);
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -143,7 +143,7 @@ export function BmiCalculator() {
   };
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
+    <form noValidate className="tool-form" onSubmit={onSubmit} onChange={calc.reset}>
       <SelectField id="bmi-units" label="Units" value={units} onChange={updateUnits} options={[{ value: "metric", label: "Metric (kg, cm)" }, { value: "imperial", label: "Imperial (lb, inches)" }]} />
       <div className="tool-form-grid">
         <NumberField id="bmi-weight" label={units === "metric" ? "Weight (kg)" : "Weight (lb)"} value={weight} onChange={setWeight} min={0} />
@@ -281,15 +281,17 @@ export function DateCalculator() {
         const weekday = weekdayOfDate(firstDate);
         return { title: weekday, detail: `${firstDate} falls on a ${weekday}.`, copyText: `${firstDate} falls on a ${weekday}.` };
       }
-      const resultDate = addDaysToDate(firstDate, parseNumericInput(dayCount, "Number of days"));
+      const offset = parseNumericInput(dayCount, "Number of days");
+      const resultDate = addDaysToDate(firstDate, offset);
       const weekday = weekdayOfDate(resultDate);
-      return { title: resultDate, detail: `${Math.abs(Number(dayCount))} days ${Number(dayCount) < 0 ? "before" : "after"} ${firstDate}; it is a ${weekday}.`, copyText: `${resultDate} (${weekday}; ${dayCount} days from ${firstDate})` };
+      const unit = Math.abs(offset) === 1 ? "day" : "days";
+      return { title: resultDate, detail: `${Math.abs(offset)} ${unit} ${offset < 0 ? "before" : "after"} ${firstDate}; it is a ${weekday}.`, copyText: `${resultDate} (${weekday}; ${offset} ${unit} from ${firstDate})` };
     });
   };
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
-      <SelectField id="date-mode" label="Calculation" value={mode} onChange={(value) => { setMode(value as "difference" | "add" | "weekday"); calc.reset(); }} options={[{ value: "difference", label: "Days between two dates" }, { value: "add", label: "Add or subtract days" }, { value: "weekday", label: "Find weekday for a date" }]} />
+    <form noValidate className="tool-form" onSubmit={onSubmit} onChange={calc.reset}>
+      <SelectField id="date-mode" label="Calculation" value={mode} onChange={(value) => setMode(value as "difference" | "add" | "weekday")} options={[{ value: "difference", label: "Days between two dates" }, { value: "add", label: "Add or subtract days" }, { value: "weekday", label: "Find weekday for a date" }]} />
       <div className="tool-form-grid">
         <TextField id="date-first" type="date" label={mode === "difference" ? "Start date" : "Date"} value={firstDate} onChange={setFirstDate} />
         {mode === "difference" ? <TextField id="date-second" type="date" label="End date" value={secondDate} onChange={setSecondDate} hint="Elapsed days exclude the start date. Inclusive count includes both dates." /> : mode === "add" ? <NumberField id="date-days" label="Days to add or subtract" value={dayCount} onChange={setDayCount} step={1} hint="Use a negative number to count backward." /> : null}
@@ -318,7 +320,7 @@ export function DiscountCalculator() {
   const presentation = calc.result ? formatDiscountResult(calc.result) : null;
 
   return <>
-    <form noValidate className="tool-form" onSubmit={onSubmit}>
+    <form noValidate className="tool-form" onSubmit={onSubmit} onChange={calc.reset}>
       <div className="tool-form-grid">
         <NumberField id="discount-price" label="Original price (₹)" value={price} onChange={setPrice} min={0} />
         <NumberField id="discount-percent" label="Discount (%)" value={discount} onChange={setDiscount} min={0} max={100} step="any" />

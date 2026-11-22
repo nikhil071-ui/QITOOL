@@ -13,7 +13,6 @@ export function SiteFooter() {
             <Image src="/brand/logo.png" alt="" width={1800} height={520} className="brand-logo brand-logo-horizontal logo-on-light footer-logo-light" sizes="180px" />
             <Image src="/brand/logo-dark.png" alt="" width={1800} height={520} className="brand-logo brand-logo-horizontal logo-on-dark footer-logo-dark" sizes="180px" />
           </Link>
-          <p>Smart Tools. Simple Life.</p>
         </div>
         <div className="footer-link-group">
           <h2>Explore</h2>
@@ -30,7 +29,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="footer-bottom page-shell">
-        <span>© {new Date().getFullYear()} QITOOL. Smart Tools. Simple Life.</span>
+        <span>© {new Date().getFullYear()} QITOOL.</span>
         <AnalyticsPreferences />
         <span className="footer-note"><span aria-hidden="true" /> Built for clarity, privacy, and everyday use.</span>
       </div>
